@@ -4,7 +4,6 @@
 #include <golxzn/core/types.hpp>
 #include <golxzn/core/traits.hpp>
 #include <cmath>
-#include <array>
 #include <iomanip>
 
 namespace golxzn::core {

@@ -42,14 +42,13 @@ TEST_CASE("Point<T, Length>", "[golxzn][core]") {
 
 	SECTION("Distance calculating") {
 		using namespace Catch;
-		constexpr core::real sad_moment{ 100000 };
 
 		const auto aver_4{ Matchers::WithinRel(4.0) };
 		const auto aver_5{ Matchers::WithinRel(5.0) };
-		const auto aver_6{ Matchers::WithinRel(6.0, std::numeric_limits<core::real>::epsilon() * sad_moment) };
+		const auto aver_6{ Matchers::WithinRel(6.0, std::numeric_limits<core::real>::epsilon()) };
 		const auto aver_16{ Matchers::WithinRel(16.0) };
 		const auto aver_25{ Matchers::WithinRel(25.0) };
-		const auto aver_36{ Matchers::WithinRel(36.0, std::numeric_limits<core::real>::epsilon() * sad_moment) };
+		const auto aver_36{ Matchers::WithinRel(36.0, std::numeric_limits<core::real>::epsilon()) };
 
 		REQUIRE_THAT((Point1R{ 2.0 }.distance(Point1R{ 6.0 })), aver_4);
 		REQUIRE_THAT((Point1U{ 2u }.distance(Point1R{ 6.0 })), aver_4);
@@ -66,9 +65,9 @@ TEST_CASE("Point<T, Length>", "[golxzn][core]") {
 		REQUIRE_THAT((Point2R{ 2.0, 4.0 }.distanceSquared(Point2U{ 6u, 7u })), aver_25);
 
 		constexpr core::real boring_num{ 6.316624790358 };
-		std::cout << "Distance: " << std::setprecision(20) << std::fixed << Point3R{ 2.0, 4.0, 3.0 }.distance(Point3R{ 6.0, 7.0, boring_num }) << "\n";
-		std::cout << "Value:    " << std::setprecision(20) << std::fixed << 6.0 << "\n";
-		std::cout << "Epsilon:  " << std::setprecision(20) << std::fixed << std::numeric_limits<core::real>::epsilon() * sad_moment << "\n";
+		// std::cout << "Distance: " << std::setprecision(20) << std::fixed << Point3R{ 2.0, 4.0, 3.0 }.distance(Point3R{ 6.0, 7.0, boring_num }) << "\n";
+		// std::cout << "Value:    " << std::setprecision(20) << std::fixed << 6.0 << "\n";
+		// std::cout << "Epsilon:  " << std::setprecision(20) << std::fixed << std::numeric_limits<core::real>::epsilon() << "\n";
 
 		REQUIRE_THAT((Point3R{ 2.0, 4.0, 3.0 }.distance(Point3R{ 6.0, 7.0, boring_num })), aver_6);
 		REQUIRE_THAT((Point3U{ 2u, 4u, 3u }.distance(Point3R{ 6.0, 7.0, boring_num })), aver_6);
