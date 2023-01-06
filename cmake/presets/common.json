@@ -20,6 +20,7 @@
 		{
 			"name": "dev-mode",
 			"hidden": true,
+			"binaryDir": "${sourceDir}/build/${presetName}",
 			"cacheVariables": {
 				"GOLXZNC_DEVELOPER_MODE": true,
 				"BUILD_TESTING": true,
@@ -42,7 +43,6 @@
 		},
 		{
 			"name": "ci-build",
-			"binaryDir": "${sourceDir}/build",
 			"hidden": true
 		}
 	]

@@ -11,14 +11,12 @@
 			"name": "dev-windows",
 			"displayName": "[DEV] Windows",
 			"inherits": [ "ci-win64", "dev-mode" ],
-			"binaryDir": "${sourceDir}/build/dev_windows",
 			"condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
 		},
 		{
 			"name": "windows",
 			"displayName": "Windows",
 			"inherits": [ "ci-win64" ],
-			"binaryDir": "${sourceDir}/build/windows",
 			"condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
 		},
 
@@ -26,14 +24,12 @@
 			"name": "dev-linux",
 			"displayName": "[DEV] Linux",
 			"inherits": [ "ci-unix", "clang-tidy", "cppcheck", "dev-mode" ],
-			"binaryDir": "${sourceDir}/build/dev_linux",
 			"condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
 		},
 		{
 			"name": "linux",
 			"displayName": "Linux",
 			"inherits": [ "ci-unix", "clang-tidy", "cppcheck" ],
-			"binaryDir": "${sourceDir}/build/linux",
 			"condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
 		},
 
@@ -41,14 +37,12 @@
 			"name": "dev-macos",
 			"displayName": "[DEV] MacOS",
 			"inherits": [ "ci-unix", "dev-mode" ],
-			"binaryDir": "${sourceDir}/build/dev_macos",
 			"condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
 		},
 		{
 			"name": "macos",
 			"displayName": "MacOS",
 			"inherits": [ "ci-unix" ],
-			"binaryDir": "${sourceDir}/build/macos",
 			"condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
 		}
 

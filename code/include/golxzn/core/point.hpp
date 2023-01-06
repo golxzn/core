@@ -16,54 +16,45 @@ class GOLXZN_EXPORT Point {
 public:
 	static constexpr size_t length() { return Length; }
 
-	Point() = default;
+	constexpr Point() = default;
 
-	template<class ...Args,
-		std::enable_if_t<traits::are_same_v<T, Args...>, bool> = false>
-	Point(Args ...args) noexcept : mValues{ std::forward<Args>(args)... } { }
+	template<class ...Args, std::enable_if_t<traits::are_same_v<T, Args...>, bool> = false>
+	constexpr Point(Args ...args) noexcept : mValues{ std::forward<Args>(args)... } { }
 
 	[[nodiscard]] constexpr T operator[](const usize index) const {
 		if (index < Length) return mValues[index];
-		throw std::out_of_range{
-			"golxzn::core::Point<T, " + std::to_string(Length) +
-			">::operator[] or at() could't take " + std::to_string(index) +
-			" because the Length is " + std::to_string(Length)
-		};
+		throw std::out_of_range{ getOutOfRangeError(index) };
 	}
-	[[nodiscard]] T &operator[](const usize index) {
+	[[nodiscard]] constexpr T &operator[](const usize index) {
 		if (index < Length) return mValues[index];
-		throw std::out_of_range{
-			"golxzn::core::Point<T, " + std::to_string(Length) +
-			">::operator[] or at() could't take " + std::to_string(index) +
-			" because the Length is " + std::to_string(Length)
-		};
+		throw std::out_of_range{ getOutOfRangeError(index) };
 	}
 
-	[[nodiscard]] T at(const usize index) const { return (*this)[index]; }
-	[[nodiscard]] T &at(const usize index) { return (*this)[index]; }
+	[[nodiscard]] constexpr T at(const usize index) const { return (*this)[index]; }
+	[[nodiscard]] constexpr T &at(const usize index) { return (*this)[index]; }
 
-	[[nodiscard]] real distanceSquared(const Point &other) const {
+	[[nodiscard]] constexpr real distanceSquared(const Point &other) const {
 		real sum{};
 		for(usize i{}; i < Length; ++i) {
-			const real subtraction(other.at(i) - at(i));
+			const real subtraction{ static_cast<real>(other.at(i) - at(i)) };
 			sum += subtraction * subtraction;
 		}
 		return sum;
 	}
-	[[nodiscard]] real distance(const Point &other) const {
+	[[nodiscard]] constexpr real distance(const Point &other) const {
 		/// @todo: Think about fast sqrt, but with doubles
 		return std::sqrt(distanceSquared(other));
 	}
 
-	T *raw() {
+	[[nodiscard]] constexpr T *raw() {
 		return mValues;
 	}
-	const T *const raw() const {
+	[[nodiscard]] constexpr T *const raw() const {
 		return mValues;
 	}
 
 	template<class S, std::enable_if_t<std::is_convertible_v<S, T>, bool> = false>
-	operator Point<S, Length>() const {
+	[[nodiscard]] constexpr operator Point<S, Length>() const {
 		Point<S, Length> other;
 		for (usize i{}; i < Length; ++i) {
 			other.at(i) = static_cast<S>(at(i));
@@ -72,7 +63,7 @@ public:
 	}
 
 	template<size_t Length2>
-	Point<T, Length2> as(const std::initializer_list<usize> ids) const {
+	[[nodiscard]] constexpr Point<T, Length2> as(const std::initializer_list<usize> ids) const {
 		assert(ids.size() >= Length2);
 		Point<T, Length2> result;
 		usize counter{};
@@ -82,7 +73,7 @@ public:
 		return result;
 	}
 
-	bool operator==(const Point &other) const {
+	[[nodiscard]] constexpr bool operator==(const Point &other) const {
 		if (this == &other)
 			return true;
 
@@ -94,12 +85,18 @@ public:
 		}
 		return true;
 	}
-	bool operator!=(const Point &other) const {
+	[[nodiscard]] constexpr bool operator!=(const Point &other) const {
 		return !(*this == other);
 	}
 
 private:
 	T mValues[Length]{};
+
+	static constexpr std::string getOutOfRangeError(const usize index) {
+		return "golxzn::core::Point<T, " + std::to_string(Length)
+			+ ">::operator[] or at() could't take " + std::to_string(index)
+			+ " because the Length is " + std::to_string(Length);
+	}
 };
 
 template<class T>
@@ -136,15 +133,15 @@ public:
 		return subtraction < 0.0 ? -subtraction : subtraction;
 	}
 
-	T *raw() {
+	[[nodiscard]] constexpr T *raw() {
 		return &value;
 	}
-	const T *const raw() const {
+	[[nodiscard]] constexpr T *const raw() const {
 		return &value;
 	}
 
 	template<class S, std::enable_if_t<std::is_convertible_v<S, T>, bool> = false>
-	constexpr operator Point<S, 1>() const {
+	[[nodiscard]] constexpr operator Point<S, 1>() const {
 		return Point<S, 1>{ static_cast<S>(value) };
 	}
 

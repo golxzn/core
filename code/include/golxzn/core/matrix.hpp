@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+#include <iomanip>
 #include <array>
 #include <limits>
 #include <exception>
@@ -26,6 +28,7 @@ public:
 	using transpositioned_matrix = Matrix<T, Rows, Columns>;
 	using value_type = T;
 	using values_container = std::array<value_type, Length>;
+	using size_type = typename values_container::size_type;
 
 	[[nodiscard]] static constexpr usize columns() { return Columns; }
 	[[nodiscard]] static constexpr usize rows() { return Rows; }
@@ -41,19 +44,21 @@ public:
 
 	[[nodiscard]] constexpr T &at(const usize row, const usize column) {
 		if (row >= rows() || column >= columns()) {
-			throw std::out_of_range{ "..." };
+			throw std::out_of_range{ getOutOfRangeError(row, column) };
 		}
 		return at(index(row, column));
 	}
 	[[nodiscard]] constexpr T at(const usize row, const usize column) const {
-		static_assert(row < rows() && column < columns(), "...");
-		return mValues[index(row, column)];
+		if (row >= rows() || column >= columns()) {
+			throw std::out_of_range{ getOutOfRangeError(row, column) };
+		}
+		return mValues[static_cast<size_type>(index(row, column))];
 	}
 	[[nodiscard]] constexpr T at(const usize index) const {
-		return mValues.at(index);
+		return mValues.at(static_cast<size_type>(index));
 	}
 	[[nodiscard]] constexpr T &at(const usize index) {
-		return mValues.at(index);
+		return mValues.at(static_cast<size_type>(index));
 	}
 
 	[[nodiscard]] T *data() { return mValues.data(); }
@@ -68,32 +73,58 @@ public:
 	[[nodiscard]] static constexpr Matrix zero() {
 		return Matrix{ values_container{} };
 	}
-	Matrix &makeIdentity() {
+	constexpr Matrix &makeIdentity() {
 		mValues = identityValues();
 		return *this;
 	}
-	Matrix &reverse() {
-		if (rows() != columns()) return *this;
+	constexpr Matrix &makeZero() {
+		std::fill_n(mValues, mValues.size(), static_cast<T>(0));
+		return *this;
+	}
+
+	constexpr Matrix &reverse() {
+		if (rows() != columns()) {
+			throw std::runtime_error{ "Cannot reverse cuz of rows != columns" };
+		}
 
 		for (usize row{}; row < rows(); ++row) {
-			for (usize column{}; column < columns(); ++column) {
+			for (usize column{ row + 1 }; column < columns(); ++column) {
 				if (row == column) continue;
 				std::swap(at(row, column), at(column, row));
 			}
 		}
 		return *this;
 	}
-	[[nodiscard]] constexpr transpositioned_matrix transposition() const {
-		transpositioned_matrix result;
+
+	Matrix reverse() const {
+		if (rows() != columns()) {
+			throw std::runtime_error{ "Cannot reverse cuz of rows != columns" };
+		}
+
+		values_container container{};
 		for (usize row{}; row < rows(); ++row) {
-			for (usize column{ row + 1 }; column < columns(); ++column) {
-				std::swap(result[index(row, column)], result[index(column, row)]);
+			for (usize column{}; column < columns(); ++column) {
+				container.at(static_cast<size_type>(index(row, column))) = at(column, row);
 			}
 		}
-		return result;
+		return Matrix{ std::move(container) };
+	}
+
+	[[nodiscard]] constexpr transpositioned_matrix transposition() const {
+		typename transpositioned_matrix::values_container result{};
+		for (usize row{}; row < rows(); ++row) {
+			for (usize column{ row + 1 }; column < columns(); ++column) {
+				std::swap(
+					result[static_cast<size_type>(index(row, column))],
+					result[static_cast<size_type>(index(column, row))]
+				);
+			}
+		}
+		return transpositioned_matrix{ std::move(result) };
 	}
 	[[nodiscard]] constexpr submatrix subMatrix(const usize row, const usize column) const {
 		if constexpr (std::is_void_v<submatrix>) return;
+		if constexpr (columns() == 1 || rows() == 1) return;
 		if (columns() == 1 || rows() == 1) return {};
 
 		submatrix result;
@@ -129,22 +160,22 @@ public:
 		return !(*this == other);
 	}
 
-	[[nodiscard]] Matrix &operator+=(const Matrix &other) {
+	Matrix &operator+=(const Matrix &other) {
 		std::transform(std::begin(mValues), std::end(mValues), std::begin(other.mValues),
 			std::begin(mValues), std::plus<int>());
 		return *this;
 	}
-	[[nodiscard]] Matrix &operator-=(const Matrix &other) {
+	Matrix &operator-=(const Matrix &other) {
 		std::transform(std::begin(mValues), std::end(mValues), std::begin(other.mValues),
 			std::begin(mValues), std::minus<int>());
 		return *this;
 	}
-	[[nodiscard]] Matrix &operator*=(const T &value) {
+	Matrix &operator*=(const T &value) {
 		std::transform(std::begin(mValues), std::end(mValues), std::begin(mValues),
 			[&value](const T &elem) { return elem * value; });
 		return *this;
 	}
-	[[nodiscard]] Matrix &operator/=(const T &value) {
+	Matrix &operator/=(const T &value) {
 		std::transform(std::begin(mValues), std::end(mValues), std::begin(mValues),
 			[&value](const T &elem) { return elem / value; });
 		return *this;
@@ -186,13 +217,22 @@ private:
 		else if constexpr (rows() == 4) return { 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
 		else {
 			values_container values{};
-			for (usize id{}; id != columns(); ++id) {
-				values.at(index(id, id)) = one;
+			for (size_type id{}; id < length(); id += static_cast<size_type>(columns() + 1)) {
+				values[id] = one;
 			}
 			return values;
 		}
 	}
+
+	static constexpr std::string getOutOfRangeError(const usize row, const usize column) {
+		return "golxzn::core::Matrix<T, " + std::to_string(columns()) + ", "
+			+ std::to_string(rows()) + ">::at() could't take column " + std::to_string(column)
+			+ ", and row " + std::to_string(row);
+	}
 };
+
+template<class T>
+using mat2 = Matrix<T, 2, 2>;
 
 template<class T>
 using mat3 = Matrix<T, 3, 3>;
@@ -215,3 +255,28 @@ using mat4i32 = mat4<i32>;
 using mat4i = mat4i32;
 
 } // namespace golxzn::core
+
+template<class T, size_t Columns, size_t Rows>
+inline std::ostream &operator<<(std::ostream &out, const golxzn::core::Matrix<T, Columns, Rows> &matrix) {
+	// ┌     ┐
+	// | 3 4 |
+	// | 3 4 |
+	// └     ┘
+	constexpr std::streamsize paddings{ 4 };
+
+	size_t counter{ 1 };
+	for (const auto &value : matrix) {
+		if (counter == 1) {
+			out << '|';
+		}
+		out << std::setw(paddings) << " " << std::setprecision(3) << std::fixed << value << std::setw(paddings + 1) << " ";
+		if (counter == Columns) {
+			out << "|\n";
+			counter = 0;
+		}
+		++counter;
+	}
+	return out;
+}
+
+
