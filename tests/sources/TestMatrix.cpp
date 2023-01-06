@@ -2,9 +2,11 @@
 #include <functional>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/benchmark/catch_benchmark.hpp>
+
 #include <golxzn/core/matrix.hpp>
 
-TEST_CASE("Matrix<T, Columns, Rows>", "[golxzn][core]") {
+TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 	using namespace golxzn;
 	using namespace std::placeholders;
 
@@ -24,11 +26,17 @@ TEST_CASE("Matrix<T, Columns, Rows>", "[golxzn][core]") {
 		}
 	};
 
+	constexpr core::mat3<core::i32> origin{
+		2, 2, 2,
+		2, 2, 2,
+		2, 2, 2
+	};
 	constexpr core::mat3i32 sequential{
 		0, 1, 2,
 		3, 4, 5,
 		6, 7, 8
 	};
+
 	SECTION("Construct") {
 		check_values("empty", core::mat3<core::real>::zero(), zero_num_gen);
 
@@ -43,12 +51,12 @@ TEST_CASE("Matrix<T, Columns, Rows>", "[golxzn][core]") {
 	}
 	SECTION("Identities") {
 		auto generator = [](core::usize row, core::usize column) { return (column == row ? 1 : 0); };
-		check_values("mat<1, 1>", core::Matrix<core::i32, 1, 1>::identity(), generator);
-		check_values("mat<2, 2>", core::Matrix<core::i32, 2, 2>::identity(), generator);
-		check_values("mat<3, 3>", core::Matrix<core::i32, 3, 3>::identity(), generator);
-		check_values("mat<4, 4>", core::Matrix<core::i32, 4, 4>::identity(), generator);
-		check_values("mat<5, 5>", core::Matrix<core::i32, 5, 5>::identity(), generator);
-		check_values("mat<10, 10>", core::Matrix<core::i32, 10, 10>::identity(), generator);
+		check_values("mat<1, 1>", core::mat<core::i32, 1, 1>::identity(), generator);
+		check_values("mat<2, 2>", core::mat<core::i32, 2, 2>::identity(), generator);
+		check_values("mat<3, 3>", core::mat<core::i32, 3, 3>::identity(), generator);
+		check_values("mat<4, 4>", core::mat<core::i32, 4, 4>::identity(), generator);
+		check_values("mat<5, 5>", core::mat<core::i32, 5, 5>::identity(), generator);
+		check_values("mat<10, 10>", core::mat<core::i32, 10, 10>::identity(), generator);
 	}
 	SECTION("Indexes and value getting") {
 		REQUIRE(core::mat3i32::index(0, 0) == 0);
@@ -71,25 +79,39 @@ TEST_CASE("Matrix<T, Columns, Rows>", "[golxzn][core]") {
 		REQUIRE_FALSE(sequential == seq_reversed);
 		REQUIRE(sequential.reverse() == seq_reversed);
 
-		core::mat2<core::i32> origin{ 0, 1, 2, 3 };
-		core::mat2<core::i32> copy{ origin };
-		REQUIRE(origin == copy);
-		origin.reverse();
-		REQUIRE_FALSE(origin == copy);
+		core::mat2<core::i32> orig{ 0, 1, 2, 3 };
+		core::mat2<core::i32> copy{ orig };
+		REQUIRE(orig == copy);
+		orig.reverse();
+		REQUIRE_FALSE(orig == copy);
 		copy.reverse();
-		REQUIRE(origin == copy);
+		REQUIRE(orig == copy);
 
-		core::Matrix<core::i32, 2, 1> vec{ 1, 2 };
+		core::mat<core::i32, 2, 1> vec{ 1, 2 };
 		REQUIRE_THROWS(vec.reverse());
 	}
 	SECTION("Transposition") {
-		const auto transpositioned{ sequential.transposition() };
+		const core::mat<core::i32, 2, 3> origin{
+			1, 2,
+			3, 4,
+			5, 6
+		};
+		const core::mat<core::i32, 3, 2> trans{
+			1, 3, 5,
+			2, 4, 6
+		};
+		REQUIRE(origin.transposition() == trans);
+		const core::mat<core::i32, 1, 3> test{
+			1,
+			2,
+			3,
+		};
 	}
 	SECTION("Submatrix") {
 		const auto sub{ sequential.subMatrix(1, 1) };
 		REQUIRE(sub.rows() == 2);
 		REQUIRE(sub.columns() == 2);
-		check_values("submatrix", sub, [](core::usize row, core::usize column) {
+		check_values("subMatrixrix", sub, [](core::usize row, core::usize column) {
 			static constexpr std::initializer_list<core::i32> values{
 				0, 2,
 				6, 8
@@ -103,13 +125,6 @@ TEST_CASE("Matrix<T, Columns, Rows>", "[golxzn][core]") {
 		REQUIRE(subsmall.columns() == 1);
 		REQUIRE(subsmall.at(0, 0) == 3);
 	}
-
-	constexpr core::mat3<core::i32> origin{
-		2, 2, 2,
-		2, 2, 2,
-		2, 2, 2
-	};
-
 	SECTION("Summation") {
 		core::mat3<core::i32> copy{ origin };
 		copy += core::mat3<core::i32>{
@@ -146,6 +161,18 @@ TEST_CASE("Matrix<T, Columns, Rows>", "[golxzn][core]") {
 		for (const auto &value : origin) {
 			REQUIRE(value == 2);
 		}
-		std::cout << core::mat4r::identity() << "\n";
 	}
+}
+
+TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][benchmarks]") {
+	using namespace golxzn;
+	constexpr size_t columns{ 100 };
+	std::array<core::i32, columns * columns> values;
+	std::iota(std::begin(values), std::end(values), 1);
+	core::mat<core::i32, columns, columns> forBench{ std::move(values) };
+	const auto forBenchCopy{ forBench };
+
+	BENCHMARK("mat<i32, 100, 100> Transposition")  { return forBench.transposition();  };
+	BENCHMARK("mat<i32, 100, 100> Reverse")        { return forBench.reverse();        };
+	BENCHMARK("mat<i32, 100, 100> Reverse (copy)") { return forBenchCopy.reverse();    };
 }
