@@ -178,7 +178,8 @@ TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 			};
 			return result.at(row, column);
 		});
-
+		const auto one{ core::smat<core::i32, 1>{ 5 } * core::smat<core::i32, 1>{ 10 } };
+		REQUIRE(one.at(0, 0) == 50);
 	}
 	SECTION("Division") {
 		core::mat3<core::i32> copy{ origin * 5 };
@@ -190,6 +191,9 @@ TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 		for (const auto &value : origin) {
 			REQUIRE(value == 2);
 		}
+	}
+	SECTION("Determinant") {
+		REQUIRE(core::mat2<core::i32>{ 3, 7, 1, -4 }.determinant() == -19);
 	}
 }
 

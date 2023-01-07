@@ -64,6 +64,21 @@ public:
 		return mValues.at(static_cast<size_type>(index));
 	}
 
+	[[nodiscard]] constexpr T determinant() const {
+		static_assert(columns() == rows(), "Matrix must be square");
+		if constexpr (columns() == 1) {
+			return mValues.at(0);
+		} else if constexpr (columns() == 2) {
+			return mValues.at(0) * mValues.at(3) - mValues.at(1) * mValues.at(2);
+		}
+
+		T det{};
+		for (size_type i = 0; i < columns(); ++i) {
+			det += mValues.at(i) * subMatrix(0, i).determinant() * ((i % 2 == 0) ? 1 : -1);
+		}
+		return det;
+	}
+
 	[[nodiscard]] T *data() { return mValues.data(); }
 	[[nodiscard]] const T *data() const { return mValues.data(); }
 
@@ -207,10 +222,10 @@ public:
 		typename result_matrix::values_container result{};
 
 		#pragma omp parallel for
-		for (size_t mRow{}; mRow < rows(); ++mRow) {
-			for (size_t oColumn{}; oColumn < other.columns(); ++oColumn) {
-				for (size_t oRow{}; oRow < other.rows(); ++oRow) {
-					result.at(result_matrix::index(mRow, oColumn))
+		for (usize mRow{}; mRow < rows(); ++mRow) {
+			for (usize oColumn{}; oColumn < other.columns(); ++oColumn) {
+				for (usize oRow{}; oRow < other.rows(); ++oRow) {
+					result.at(static_cast<size_type>(result_matrix::index(mRow, oColumn)))
 						+= at(mRow, oRow) * other.at(oRow, oColumn);
 				}
 			}
