@@ -12,7 +12,7 @@
 
 namespace golxzn::core {
 
-template<class T, usize Columns, usize Rows>
+template<class T, usize Rows, usize Columns>
 class GOLXZN_EXPORT mat {
 	static_assert(Columns != 0 && Rows != 0,
 		"❌ [golxzn::core::mat] has to have at least one row and one column");
@@ -23,13 +23,13 @@ class GOLXZN_EXPORT mat {
 	template<class T> struct _submat<T, 0, 0> { using value = void; };
 
 public:
-	static constexpr auto one{ static_cast<T>(1) };
-	using submat = typename _submat<T, Columns, Rows>::value;
-	using transpositioned_matrix = mat<T, Rows, Columns>;
+	using submat = typename _submat<T, Rows, Columns>::value;
+	using transpositioned_matrix = mat<T, Columns, Rows>;
 	using value_type = T;
 	using values_container = std::array<value_type, Length>;
 	using size_type = typename values_container::size_type;
 
+	static constexpr auto one{ static_cast<value_type>(1) };
 	[[nodiscard]] static constexpr usize columns() { return Columns; }
 	[[nodiscard]] static constexpr usize rows() { return Rows; }
 	[[nodiscard]] static constexpr usize length() { return Length; }
@@ -41,6 +41,9 @@ public:
 	constexpr mat(Args ...args) noexcept : mValues{ std::forward<Args>(args)... } {}
 
 	constexpr explicit mat(values_container &&values) noexcept : mValues{ std::move(values) } {}
+
+	constexpr mat(const mat &other) noexcept : mValues{ other.mValues } {}
+	constexpr mat(mat &&other) noexcept : mValues{ std::move(other.mValues) } {}
 
 	[[nodiscard]] constexpr T &at(const usize row, const usize column) {
 		if (row >= rows() || column >= columns()) {
@@ -87,6 +90,7 @@ public:
 			throw std::runtime_error{ "Cannot reverse cuz of rows != columns" };
 		}
 
+		#pragma omp parallel for
 		for (usize row{}; row < rows(); ++row) {
 			for (usize column{ row + 1 }; column < columns(); ++column) {
 				std::swap(at(row, column), at(column, row));
@@ -131,6 +135,7 @@ public:
 		if (columns() == 1 || rows() == 1) return {};
 
 		submat result;
+		#pragma omp parallel for
 		for (usize _row{}; _row < rows(); ++_row) {
 			if (_row == row) continue;
 			const usize rowId{ _row > row ? _row - 1 : _row };
@@ -196,18 +201,36 @@ public:
 		return mat{ *this } /= value;
 	}
 
-	[[nodiscard]] constexpr typename values_container::iterator begin() noexcept { return mValues.begin(); }
-	[[nodiscard]] constexpr typename values_container::const_iterator begin() const noexcept { return mValues.begin(); }
-	[[nodiscard]] constexpr typename values_container::iterator end() noexcept { return mValues.end(); }
-	[[nodiscard]] constexpr typename values_container::const_iterator end() const noexcept { return mValues.end(); }
-	[[nodiscard]] constexpr typename values_container::reverse_iterator rbegin() noexcept { return mValues.rbegin(); }
-	[[nodiscard]] constexpr typename values_container::const_reverse_iterator rbegin() const noexcept { return mValues.rbegin(); }
-	[[nodiscard]] constexpr typename values_container::reverse_iterator rend() noexcept { return mValues.rend(); }
-	[[nodiscard]] constexpr typename values_container::const_reverse_iterator rend() const noexcept { return mValues.rend(); }
-	[[nodiscard]] constexpr typename values_container::const_iterator cbegin() const noexcept { return mValues.cbegin(); }
-	[[nodiscard]] constexpr typename values_container::const_iterator cend() const noexcept { return mValues.cend(); }
-	[[nodiscard]] constexpr typename values_container::const_reverse_iterator crbegin() const noexcept { return mValues.crbegin(); }
-	[[nodiscard]] constexpr typename values_container::const_reverse_iterator crend() const noexcept { return mValues.crend(); }
+	template<size_t OtherColumns>
+	[[nodiscard]] constexpr mat<T, OtherColumns, Rows> operator*(const mat<T, Columns, OtherColumns> &other) const {
+		using result_matrix = mat<T, OtherColumns, Rows>;
+		typename result_matrix::values_container result{};
+
+		#pragma omp parallel for
+		for (size_t mRow{}; mRow < rows(); ++mRow) {
+			for (size_t oColumn{}; oColumn < other.columns(); ++oColumn) {
+				for (size_t oRow{}; oRow < other.rows(); ++oRow) {
+					result.at(result_matrix::index(mRow, oColumn))
+						+= at(mRow, oRow) * other.at(oRow, oColumn);
+				}
+			}
+		}
+
+		return result_matrix{ std::move(result) };
+	}
+
+	[[nodiscard]] constexpr typename values_container::iterator               begin()   noexcept       { return mValues.begin();  }
+	[[nodiscard]] constexpr typename values_container::const_iterator         begin()   const noexcept { return mValues.begin();  }
+	[[nodiscard]] constexpr typename values_container::iterator               end()     noexcept       { return mValues.end();    }
+	[[nodiscard]] constexpr typename values_container::const_iterator         end()     const noexcept { return mValues.end();    }
+	[[nodiscard]] constexpr typename values_container::reverse_iterator       rbegin()  noexcept       { return mValues.rbegin(); }
+	[[nodiscard]] constexpr typename values_container::const_reverse_iterator rbegin()  const noexcept { return mValues.rbegin(); }
+	[[nodiscard]] constexpr typename values_container::reverse_iterator       rend()    noexcept       { return mValues.rend();   }
+	[[nodiscard]] constexpr typename values_container::const_reverse_iterator rend()    const noexcept { return mValues.rend();   }
+	[[nodiscard]] constexpr typename values_container::const_iterator         cbegin()  const noexcept { return mValues.cbegin(); }
+	[[nodiscard]] constexpr typename values_container::const_iterator         cend()    const noexcept { return mValues.cend();   }
+	[[nodiscard]] constexpr typename values_container::const_reverse_iterator crbegin() const noexcept { return mValues.crbegin();}
+	[[nodiscard]] constexpr typename values_container::const_reverse_iterator crend()   const noexcept { return mValues.crend();  }
 
 private:
 	values_container mValues{ identityValues() };
@@ -220,6 +243,7 @@ private:
 		else if constexpr (rows() == 4) return { 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1 };
 		else {
 			values_container values{};
+			#pragma omp parallel for
 			for (size_type id{}; id < length(); id += static_cast<size_type>(columns() + 1)) {
 				values[id] = one;
 			}
@@ -237,11 +261,17 @@ private:
 template<class T, usize Columns, usize Rows>
 using matrix = mat<T, Columns, Rows>;
 
-template<class T>
-using mat2 = mat<T, 2, 2>;
+template<class T, usize Row>
+using smat = mat<T, Row, Row>;
+
+template<class T, usize Row>
+using square_mat = mat<T, Row, Row>;
 
 template<class T>
-using mat3 = mat<T, 3, 3>;
+using mat2 = smat<T, 2>;
+
+template<class T>
+using mat3 = smat<T, 3>;
 
 using mat3sr = mat3<sreal>;
 using mat3f = mat3sr;
@@ -251,7 +281,7 @@ using mat3i32 = mat3<i32>;
 using mat3i = mat3i32;
 
 template<class T>
-using mat4 = mat<T, 4, 4>;
+using mat4 = smat<T, 4>;
 
 using mat4sr = mat4<sreal>;
 using mat4f = mat4sr;
@@ -262,8 +292,8 @@ using mat4i = mat4i32;
 
 } // namespace golxzn::core
 
-template<class T, size_t Columns, size_t Rows>
-inline std::ostream &operator<<(std::ostream &out, const golxzn::core::mat<T, Columns, Rows> &matrix) {
+template<class T, size_t Rows, size_t Columns>
+inline std::ostream &operator<<(std::ostream &out, const golxzn::core::mat<T, Rows, Columns> &matrix) {
 	constexpr std::streamsize paddings{ 4 };
 
 	size_t counter{ 1 };
