@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.20)
 include(cmake/prelude.cmake)
 
 project(golxzn_core
-	VERSION 0.2.0
-	DESCRIPTION "Graphics provider"
+	VERSION 0.2.1
+	DESCRIPTION "[golxzn] basic stuff for the gxen game enging"
 	HOMEPAGE_URL https://github.com/golxzn/graphics
 	LANGUAGES CXX
 )
