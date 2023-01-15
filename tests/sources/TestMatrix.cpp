@@ -3,7 +3,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/benchmark/catch_benchmark.hpp>
 
-#include <golxzn/core/matrix.hpp>
+#include <golxzn/core/math/matrix.hpp>
 
 TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 	using namespace golxzn;
@@ -66,8 +66,8 @@ TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 		REQUIRE(core::mat3i32::identity() == core::mat3i32::identity());
 		REQUIRE_FALSE(core::mat3i32::identity() == core::mat3i32::zero());
 
-		REQUIRE(core::mat3r::identity() == core::mat3r::identity());
-		REQUIRE_FALSE(core::mat3r::identity() == core::mat3r::zero());
+		REQUIRE(core::mat3f64::identity() == core::mat3f64::identity());
+		REQUIRE_FALSE(core::mat3f64::identity() == core::mat3f64::zero());
 	}
 	SECTION("Reversing") {
 		constexpr core::mat3<core::i32> seq_reversed{

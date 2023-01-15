@@ -9,7 +9,7 @@
 
 #include <golxzn/core/export.hpp>
 #include <golxzn/core/types.hpp>
-#include <golxzn/core/traits.hpp>
+#include <golxzn/core/utils/traits.hpp>
 
 namespace golxzn::core {
 
@@ -675,20 +675,20 @@ using mat2 = smat<T, 2>;
 template<class T>
 using mat3 = smat<T, 3>;
 
-using mat3sr = mat3<f32>;
-using mat3f = mat3sr;
-using mat3r = mat3<f32>;
-using mat3d = mat3r;
+using mat3f32 = mat3<f32>;
+using mat3f = mat3f32;
+using mat3f64 = mat3<f64>;
+using mat3d = mat3f64;
 using mat3i32 = mat3<i32>;
 using mat3i = mat3i32;
 
 template<class T>
 using mat4 = smat<T, 4>;
 
-using mat4sr = mat4<f32>;
-using mat4f = mat4sr;
-using mat4r = mat4<f32>;
-using mat4d = mat4r;
+using mat4f32 = mat4<f32>;
+using mat4f = mat4f32;
+using mat4f64 = mat4<f64>;
+using mat4d = mat4f64;
 using mat4i32 = mat4<i32>;
 using mat4i = mat4i32;
 

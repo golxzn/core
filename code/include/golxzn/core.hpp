@@ -2,6 +2,6 @@
 
 #include <golxzn/core/export.hpp>
 #include <golxzn/core/types.hpp>
-#include <golxzn/core/traits.hpp>
-#include <golxzn/core/point.hpp>
+#include <golxzn/core/utils/traits.hpp>
+#include <golxzn/core/math/point.hpp>
 

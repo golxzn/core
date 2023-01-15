@@ -5,17 +5,17 @@
 
 #include <golxzn/core/export.hpp>
 #include <golxzn/core/types.hpp>
-#include <golxzn/core/traits.hpp>
+#include <golxzn/core/utils/traits.hpp>
 
 namespace golxzn::core {
 
 #pragma pack(push, 1)
 
-template<class T, size_t Length>
+template<class T, usize Length>
 class GOLXZN_EXPORT point {
 	static_assert(Length != 0, "❌ [golxzn::core::point] point has to have at least 1 element!");
 public:
-	static constexpr size_t length() { return Length; }
+	static constexpr usize length() { return Length; }
 
 	constexpr point() = default;
 
@@ -63,7 +63,7 @@ public:
 		return other;
 	}
 
-	template<size_t Length2>
+	template<usize Length2>
 	[[nodiscard]] constexpr point<T, Length2> as(const std::initializer_list<usize> ids) const {
 		assert(ids.size() >= Length2);
 		point<T, Length2> result;
@@ -103,7 +103,7 @@ private:
 template<class T>
 class point<T, 1> {
 public:
-	static constexpr size_t length() { return 1; }
+	static constexpr usize length() { return 1; }
 
 	constexpr point() = default;
 	constexpr explicit point(T value) noexcept : value{ value } { }
@@ -153,12 +153,35 @@ private:
 #pragma pack(pop)
 
 template<class T> using point2 = point<T, 2>;
+
+using point2f32 = point2<f32>;
+using point2f = point2f32;
+using point2f64 = point2<f64>;
+using point2d = point2f64;
+using point2i32 = point2<i32>;
+using point2i = point2i32;
+
 template<class T> using point3 = point<T, 3>;
+
+using point3f32 = point3<f32>;
+using point3f = point3f32;
+using point3f64 = point3<f64>;
+using point3d = point3f64;
+using point3i32 = point3<i32>;
+using point3i = point3i32;
+
 template<class T> using point4 = point<T, 4>;
+
+using point4f32 = point4<f32>;
+using point4f = point4f32;
+using point4f64 = point4<f64>;
+using point4d = point4f64;
+using point4i32 = point4<i32>;
+using point4i = point4i32;
 
 } // namespace golxzn::core
 
-template<class T, size_t Length>
+template<class T, golxzn::core::usize Length>
 inline std::ostream &operator<<(std::ostream &out, const golxzn::core::point<T, Length> &point) {
 	if constexpr (Length == 1) {
 		return out << "[" << point.value << "]";

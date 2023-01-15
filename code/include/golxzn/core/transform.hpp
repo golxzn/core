@@ -1,14 +1,14 @@
 #pragma once
 
-#include <golxzn/core/matrix.hpp>
-#include <golxzn/core/point.hpp>
+#include <golxzn/core/math/matrix.hpp>
+#include <golxzn/core/math/point.hpp>
 
 namespace golxzn::core {
 
 class Transform3D {
 public:
 	Transform3D() = default;
-	explicit Transform3D(mat3r &&value) noexcept : mMatrix{ std::move(value) } {}
+	explicit Transform3D(mat3f64 &&value) noexcept : mMatrix{ std::move(value) } {}
 
 	void translate(f32 dx, f32 dy);
 	void scale(f32 xScale, f32 yScale);
@@ -18,7 +18,7 @@ public:
 	void reset();
 
 private:
-	mat3r mMatrix;
+	mat3f64 mMatrix;
 };
 
 } // namespace golxzn::core
