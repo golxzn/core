@@ -64,7 +64,7 @@ TEST_CASE("point<T, Length>", "[golxzn][core]") {
 		REQUIRE_THAT((point2U{ 2u, 4u }.distanceSquared(point2R{ 6.0, 7.0 })), aver_25);
 		REQUIRE_THAT((point2R{ 2.0, 4.0 }.distanceSquared(point2U{ 6u, 7u })), aver_25);
 
-		constexpr core::f32 boring_num{ 6.316624790358 };
+		// constexpr core::f32 boring_num{ 6.316624790358 };
 		// std::cout << "Distance: " << std::setprecision(20) << std::fixed << point3R{ 2.0, 4.0, 3.0 }.distance(point3R{ 6.0, 7.0, boring_num }) << "\n";
 		// std::cout << "Value:    " << std::setprecision(20) << std::fixed << 6.0 << "\n";
 		// std::cout << "Epsilon:  " << std::setprecision(20) << std::fixed << std::numeric_limits<core::real>::epsilon() << "\n";

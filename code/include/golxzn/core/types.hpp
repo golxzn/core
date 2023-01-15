@@ -7,7 +7,7 @@
 #endif
 
 #include <memory>
-#include <cinttypes>
+#include <cstdint>
 #include <type_traits>
 
 namespace golxzn::core {

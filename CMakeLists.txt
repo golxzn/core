@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 include(cmake/prelude.cmake)
 
 project(golxzn_core
-	VERSION 0.2.2
+	VERSION 0.2.3
 	DESCRIPTION "[golxzn] basic stuff for the gxen game enging"
 	HOMEPAGE_URL https://github.com/golxzn/core
 	LANGUAGES CXX
@@ -55,6 +55,7 @@ include(${GOLXZNC_DEPENDENCIED_DIR}/import.cmake)
 target_link_libraries(${target}_lib PUBLIC ${libraries})
 target_include_directories(${target}_lib PUBLIC ${includes})
 target_compile_definitions(${target}_lib PUBLIC ${definitions})
+target_compile_options(${target}_lib PRIVATE ${compile_options})
 
 include(${root}/cmake/install/rules.cmake)
 include(${root}/cmake/developer_mode.cmake)

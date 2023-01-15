@@ -3,12 +3,12 @@
 #include <iomanip>
 #include <array>
 #include <limits>
-#include <exception>
 #include <algorithm>
 #include <optional>
 
 #include <golxzn/core/export.hpp>
 #include <golxzn/core/types.hpp>
+#include <golxzn/core/utils/error.hpp>
 #include <golxzn/core/utils/traits.hpp>
 
 namespace golxzn::core {
@@ -65,14 +65,14 @@ public:
 
 	[[nodiscard]] constexpr T &at(const usize row, const usize column) {
 		if (row >= rows() || column >= columns()) {
-			throw std::out_of_range{ getOutOfRangeError(row, column) };
+			utils::error::out_of_range(getOutOfRangeError(row, column));
 		}
 		mDeterminant = std::nullopt;
 		return at(index(row, column));
 	}
 	[[nodiscard]] constexpr T at(const usize row, const usize column) const {
 		if (row >= rows() || column >= columns()) {
-			throw std::out_of_range{ getOutOfRangeError(row, column) };
+			utils::error::out_of_range(getOutOfRangeError(row, column));
 		}
 		return mValues[static_cast<size_type>(index(row, column))];
 	}
@@ -135,12 +135,12 @@ public:
 	}
 
 	constexpr mat &reverse() {
-		throw std::runtime_error{ "Cannot reverse cuz of rows != columns" };
+		utils::error::runtime_error("Cannot reverse because the count of rows isn't equal columns");
 		return *this;
 	}
 
 	mat reverse() const {
-		throw std::runtime_error{ "Cannot reverse cuz of rows != columns" };
+		utils::error::runtime_error("Cannot reverse because the count of rows isn't equal columns");
 		return mat{};
 	}
 
@@ -360,14 +360,14 @@ public:
 
 	[[nodiscard]] constexpr T &at(const usize row, const usize column) {
 		if (row >= rows() || column >= columns()) {
-			throw std::out_of_range{ getOutOfRangeError(row, column) };
+			utils::error::out_of_range(getOutOfRangeError(row, column));
 		}
 		mDeterminant = std::nullopt;
 		return at(index(row, column));
 	}
 	[[nodiscard]] constexpr T at(const usize row, const usize column) const {
 		if (row >= rows() || column >= columns()) {
-			throw std::out_of_range{ getOutOfRangeError(row, column) };
+			utils::error::out_of_range(getOutOfRangeError(row, column));
 		}
 		return mValues[static_cast<size_type>(index(row, column))];
 	}

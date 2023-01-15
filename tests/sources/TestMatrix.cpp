@@ -3,6 +3,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/benchmark/catch_benchmark.hpp>
 
+#include <golxzn/core/utils/error.hpp>
 #include <golxzn/core/math/matrix.hpp>
 
 TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
@@ -86,8 +87,10 @@ TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 		copy.reverse();
 		REQUIRE(orig == copy);
 
-		core::mat<core::i32, 1, 2> vec{ 1, 2 };
-		REQUIRE_THROWS(vec.reverse());
+		if constexpr (core::utils::error::exceptions_enabled) {
+			core::mat<core::i32, 1, 2> vec{ 1, 2 };
+			REQUIRE_THROWS(vec.reverse());
+		}
 	}
 	SECTION("Transposition") {
 		const core::mat<core::i32, 3, 2> orig{
