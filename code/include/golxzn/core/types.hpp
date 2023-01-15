@@ -22,9 +22,9 @@ using u16 = std::uint16_t;
 using u32 = std::uint32_t;
 using u64 = std::uint64_t;
 
-using sreal = float;
-using real = double;
-using lreal = long double;
+using f16 = float;
+using f32 = double;
+using f64 = long double;
 using size = i64;
 using usize = u64;
 
