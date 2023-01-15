@@ -34,15 +34,15 @@ public:
 	[[nodiscard]] constexpr T at(const usize index) const { return (*this)[index]; }
 	[[nodiscard]] constexpr T &at(const usize index) { return (*this)[index]; }
 
-	[[nodiscard]] constexpr real distanceSquared(const point &other) const {
-		real sum{};
+	[[nodiscard]] constexpr f32 distanceSquared(const point &other) const {
+		f32 sum{};
 		for(usize i{}; i < Length; ++i) {
-			const real subtraction{ static_cast<real>(other.at(i) - at(i)) };
+			const f32 subtraction{ static_cast<f32>(other.at(i) - at(i)) };
 			sum += subtraction * subtraction;
 		}
 		return sum;
 	}
-	[[nodiscard]] constexpr real distance(const point &other) const {
+	[[nodiscard]] constexpr f32 distance(const point &other) const {
 		/// @todo: Think about fast sqrt, but with doubles
 		return std::sqrt(distanceSquared(other));
 	}
@@ -125,12 +125,12 @@ public:
 	[[nodiscard]] T &at(const usize index) { return (*this)[index]; }
 
 
-	[[nodiscard]] constexpr real distanceSquared(const point &other) const {
-		const real subtraction(other.value - value);
+	[[nodiscard]] constexpr f32 distanceSquared(const point &other) const {
+		const f32 subtraction(other.value - value);
 		return subtraction * subtraction;
 	}
-	[[nodiscard]] constexpr real distance(const point &other) const {
-		const real subtraction(other.value - value);
+	[[nodiscard]] constexpr f32 distance(const point &other) const {
+		const f32 subtraction(other.value - value);
 		return subtraction < 0.0 ? -subtraction : subtraction;
 	}
 

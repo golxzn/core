@@ -8,13 +8,13 @@ TEST_CASE("point<T, Length>", "[golxzn][core]") {
 	using namespace std::string_literals;
 	using namespace golxzn;
 
-	using point3R = core::point3<core::real>;
+	using point3R = core::point3<core::f32>;
 	using point3I = core::point3<core::i32>;
 	using point3U = core::point3<core::u32>;
-	using point2R = core::point2<core::real>;
+	using point2R = core::point2<core::f32>;
 	using point2I = core::point2<core::i32>;
 	using point2U = core::point2<core::u32>;
-	using point1R = core::point<core::real, 1>;
+	using point1R = core::point<core::f32, 1>;
 	using point1I = core::point<core::i32, 1>;
 	using point1U = core::point<core::u32, 1>;
 
@@ -45,10 +45,10 @@ TEST_CASE("point<T, Length>", "[golxzn][core]") {
 
 		const auto aver_4{ Matchers::WithinRel(4.0) };
 		const auto aver_5{ Matchers::WithinRel(5.0) };
-		const auto aver_6{ Matchers::WithinRel(6.0, std::numeric_limits<core::real>::epsilon()) };
+		const auto aver_6{ Matchers::WithinRel(6.0, std::numeric_limits<core::f32>::epsilon()) };
 		const auto aver_16{ Matchers::WithinRel(16.0) };
 		const auto aver_25{ Matchers::WithinRel(25.0) };
-		const auto aver_36{ Matchers::WithinRel(36.0, std::numeric_limits<core::real>::epsilon()) };
+		const auto aver_36{ Matchers::WithinRel(36.0, std::numeric_limits<core::f32>::epsilon()) };
 
 		REQUIRE_THAT((point1R{ 2.0 }.distance(point1R{ 6.0 })), aver_4);
 		REQUIRE_THAT((point1U{ 2u }.distance(point1R{ 6.0 })), aver_4);
@@ -64,7 +64,7 @@ TEST_CASE("point<T, Length>", "[golxzn][core]") {
 		REQUIRE_THAT((point2U{ 2u, 4u }.distanceSquared(point2R{ 6.0, 7.0 })), aver_25);
 		REQUIRE_THAT((point2R{ 2.0, 4.0 }.distanceSquared(point2U{ 6u, 7u })), aver_25);
 
-		constexpr core::real boring_num{ 6.316624790358 };
+		constexpr core::f32 boring_num{ 6.316624790358 };
 		// std::cout << "Distance: " << std::setprecision(20) << std::fixed << point3R{ 2.0, 4.0, 3.0 }.distance(point3R{ 6.0, 7.0, boring_num }) << "\n";
 		// std::cout << "Value:    " << std::setprecision(20) << std::fixed << 6.0 << "\n";
 		// std::cout << "Epsilon:  " << std::setprecision(20) << std::fixed << std::numeric_limits<core::real>::epsilon() << "\n";
@@ -82,7 +82,7 @@ TEST_CASE("point<T, Length>", "[golxzn][core]") {
 	SECTION("Converting") {
 		REQUIRE(point.as<3>({0,0,0}) == point3R{ 3.3, 3.3, 3.3 });
 		REQUIRE(point.as<2>({2,1}) == point2R{ 4.5, 1.2 });
-		REQUIRE(point.as<5>({2,1,0,1,2}) == core::point<core::real, 5>{ 4.5, 1.2, 3.3, 1.2, 4.5 });
+		REQUIRE(point.as<5>({2,1,0,1,2}) == core::point<core::f32, 5>{ 4.5, 1.2, 3.3, 1.2, 4.5 });
 	}
 }
 

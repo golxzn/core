@@ -37,7 +37,7 @@ TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 	};
 
 	SECTION("Construct") {
-		check_values("empty", core::mat3<core::real>::zero(), zero_num_gen);
+		check_values("empty", core::mat3<core::f32>::zero(), zero_num_gen);
 
 		// Check identity matrix
 		check_values("identity", core::mat3<core::i32>{}, [](core::usize row, core::usize column) {
@@ -194,19 +194,62 @@ TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 	}
 	SECTION("Determinant") {
 		REQUIRE(core::mat2<core::i32>{ 3, 7, 1, -4 }.determinant() == -19);
+		REQUIRE(core::mat<core::i32, 2, 3>{ 0, 1, 2, 3, 4, 5 }.determinant() == 0);
 	}
+	SECTION("Swap") {
+		auto copy{ sequential };
+		copy.swap(0, 1);
+		REQUIRE(copy == core::mat3i32{ 3, 4, 5, 0, 1, 2, 6, 7, 8 });
+		copy.swap(1, 2, decltype(copy)::Target::Columns);
+		REQUIRE(copy == core::mat3i32{ 3, 5, 4, 0, 2, 1, 6, 8, 7 });
+	}
+	SECTION("Separate") {
+		const core::mat3i32::separated_matrix<core::i32> result{
+			2, 2, 2, 0, 1, 2,
+			2, 2, 2, 3, 4, 5,
+			2, 2, 2, 6, 7, 8
+		};
+		REQUIRE(origin.separate(sequential) == result);
+
+	}
+	SECTION("Inverse") {
+		const core::mat3<core::f32> matrix{
+			3.0,  0.0,  2.0,
+			2.0,  0.0, -2.0,
+			0.0,  1.0,  1.0
+		};
+		const core::mat3<core::f32> result{
+			 0.2,  0.2,  0.0,
+			-0.2,  0.3,  1.0,
+			 0.2, -0.3,  0.0
+		};
+		const auto optional{ matrix.inverse() };
+		REQUIRE(optional.has_value());
+		REQUIRE(optional.value() == result);
+	}
+}
+
+template<class T, size_t Columns, size_t Rows>
+inline constexpr golxzn::core::mat<T, Rows, Columns> make_mat() {
+	std::array<T, Columns * Rows> values;
+	std::iota(std::begin(values), std::end(values), 1);
+	return golxzn::core::mat<T, Rows, Columns>{ std::move(values) };
 }
 
 TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][benchmarks]") {
 	using namespace golxzn;
 	constexpr size_t columns{ 100 };
-	std::array<core::i32, columns * columns> values;
-	std::iota(std::begin(values), std::end(values), 1);
-	core::mat<core::i32, columns, columns> forBench{ std::move(values) };
+	auto forBench{ make_mat<core::i32, columns, columns>() };
 	const auto forBenchCopy{ forBench };
+
+	constexpr size_t detCols{ 10 };
+	auto forDeterminant{ make_mat<core::i32, detCols, detCols>() };
+	auto forInvalidDeterminant{ make_mat<core::i32, detCols, detCols + 1>() };
 
 	BENCHMARK("mat<i32, 100, 100> Transposition")  { return forBench.transposition();  };
 	BENCHMARK("mat<i32, 100, 100> Reverse")        { return forBench.reverse();        };
 	BENCHMARK("mat<i32, 100, 100> Reverse (copy)") { return forBenchCopy.reverse();    };
 	BENCHMARK("mat<i32, 100, 100> multiplication") { return forBench * forBenchCopy;   };
+	BENCHMARK("mat<i32, 12, 12> determinant")    { return forDeterminant.determinant();    };
+	BENCHMARK("mat<i32, 12, 13> determinant")    { return forInvalidDeterminant.determinant(); };
 }
