@@ -15,8 +15,7 @@ public:
 	constexpr explicit Transform2D(mat3f32 &&value, vec2f32 &&pivot) noexcept
 		: mMatrix{ std::move(value) }, mPivot{ std::move(pivot) } {}
 
-	constexpr explicit Transform2D(const mat3f32 &value) noexcept : mMatrix{ value } {}
-	constexpr explicit Transform2D(const mat3f32 &value, const vec2f32 &pivot) noexcept
+	constexpr explicit Transform2D(const mat3f32 &value, const vec2f32 &pivot = DefaultPivot) noexcept
 		: mMatrix{ value }, mPivot{ pivot } {}
 
 	constexpr Transform2D(const Transform2D &) = default;

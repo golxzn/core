@@ -69,14 +69,17 @@ Transform2D &Transform2D::shear(const math::anglef32 phi, const math::anglef32 p
 }
 
 Transform2D &Transform2D::rotate(const math::anglef32 degrees) {
+	translate(-mPivot);
 	const f32 sin{ degrees.sin() };
 	const f32 cos{ degrees.cos() };
 	const f32 y{ mMatrix(1, 2) };
 	mMatrix(0, 0) *= cos; mMatrix(0, 1) *= -sin; mMatrix(0, 2) *= 1 - cos + y * sin;
 	mMatrix(1, 0) *= sin; mMatrix(1, 1) *= cos; mMatrix(1, 2) = y * (1 - cos) - sin;
-	return *this;
+	return translate(mPivot);
 }
 Transform2D &Transform2D::reset() {
+	mMatrix = mat3f32::identity();
+	mPivot = DefaultPivot;
 	return *this;
 }
 

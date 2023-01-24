@@ -97,6 +97,14 @@ public:
 	[[nodiscard]] constexpr bool operator!=(const point &other) const {
 		return !(*this == other);
 	}
+	[[nodiscard]] constexpr point operator-() const noexcept {
+		point result;
+		#pragma omp parallel for
+		for (usize i{}; i < length(); ++i) {
+			result.at(i) = -at(i);
+		}
+		return result;
+	}
 
 private:
 	value_type mValues[Length]{};

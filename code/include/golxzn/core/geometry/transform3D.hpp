@@ -1,7 +1,9 @@
 #pragma once
 
+#include <optional>
 #include <golxzn/core/math/matrix.hpp>
 #include <golxzn/core/math/vector.hpp>
+#include <golxzn/core/math/angle.hpp>
 
 namespace golxzn::core::geometry {
 
@@ -17,6 +19,11 @@ public:
 
 	constexpr explicit Transform3D(const mat4f32 &value, const vec3f32 &pivot = DefaultPivot) noexcept
 		: mMatrix{ value }, mPivot{ pivot } {}
+
+	constexpr Transform3D(const Transform3D &) = default;
+	constexpr Transform3D(Transform3D &&) noexcept = default;
+	Transform3D &operator=(const Transform3D &) = default;
+	Transform3D &operator=(Transform3D &&) noexcept = default;
 
 	[[nodiscard]] vec3f32 size() const noexcept;
 	[[nodiscard]] f32 volume() const noexcept;
@@ -35,12 +42,10 @@ public:
 	Transform3D &scale(const vec3f32 &scale);
 	Transform3D &scale(const f32 scale);
 
-	Transform3D &shear(const f32 xShear, const f32 yShear, const f32 zShear);
-	Transform3D &shear(const vec3f32 &scale);
+	Transform3D &shear(const math::anglef32 xsh, const math::anglef32 ysh, const math::anglef32 zsh);
 
-	Transform3D &rotate(const f32 degrees, const vec3f32 &axis);
+	Transform3D &rotate(const math::anglef32 degrees, const vec3f32 &axis);
 	Transform3D &reset();
-
 
 private:
 	mat4f32 mMatrix{};

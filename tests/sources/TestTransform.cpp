@@ -44,4 +44,40 @@ TEST_CASE("Transform2D", "[geometry]") {
 
 TEST_CASE("Transform3D", "[geometry]") {
 	using namespace golxzn::core;
+	using namespace golxzn::types_literals;
+
+	SECTION("Constructors") {
+		const geometry::Transform3D defaultConstructed;
+
+		REQUIRE(defaultConstructed.size() == vec3f32{ 1.0_f32, 1.0_f32, 1.0_f32 });
+		REQUIRE(defaultConstructed.volume() == 1.0_f32);
+		REQUIRE(defaultConstructed.position() == vec3f32{ 0.0_f32, 0.0_f32, 0.0_f32 });
+		REQUIRE(defaultConstructed.pivot() == geometry::Transform3D::DefaultPivot);
+
+		const geometry::Transform3D moveConstructed{ mat4f32{
+			5.0_f32, 0.0_f32, 0.0_f32, 3.0_f32,
+			0.0_f32, 5.0_f32, 0.0_f32, 4.0_f32,
+			0.0_f32, 0.0_f32, 5.0_f32, 5.0_f32,
+			0.0_f32, 0.0_f32, 0.0_f32, 1.0_f32
+		} };
+
+		REQUIRE(moveConstructed.size() == vec3f32{ 5.0_f32, 5.0_f32, 5.0_f32 });
+		REQUIRE(moveConstructed.volume() == 125.0_f32);
+		REQUIRE(moveConstructed.position() == vec3f32{ 3.0_f32, 4.0_f32, 5.0_f32 });
+		REQUIRE(moveConstructed.pivot() == geometry::Transform3D::DefaultPivot);
+	}
+
+	SECTION("Methods") {
+		using namespace golxzn::angle_literals;
+		geometry::Transform3D transform{};
+
+		transform.translate(2.0_f32, 2.0_f32, 2.0_f32);
+		REQUIRE(transform.position() == vec3f32{ 2.0_f32, 2.0_f32, 2.0_f32 });
+		transform.scale(3.0_f32, 3.0_f32, 3.0_f32);
+		REQUIRE(transform.size() == vec3f32{ 3.0_f32, 3.0_f32, 3.0_f32 });
+
+		// TODO: Add tests for shear() and rotate()
+		transform.shear(30_deg, 30_deg, 30_deg);
+		transform.rotate(45_deg, vec3f32{ 1.0_f32, 1.0_f32, 0.0_f32 });
+	}
 }
