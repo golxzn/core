@@ -41,12 +41,11 @@ public:
 	mat() = default;
 
 	template<class ...Args, std::enable_if_t<traits::are_same_v<T, Args...>, bool> = false>
-	constexpr mat(Args ...args) noexcept : mValues{ std::forward<Args>(args)... } {}
+	constexpr explicit mat(Args ...args) noexcept : mValues{ std::forward<Args>(args)... } {}
 
 	constexpr explicit mat(values_container &&values) noexcept : mValues{ std::move(values) } {}
 
-	constexpr mat(const mat &other) noexcept
-		: mValues{ other.mValues }, mDeterminant{ other.mDeterminant } {}
+	constexpr mat(const mat &other) noexcept = default;
 	constexpr mat(mat &&other) noexcept
 		: mValues{ std::move(other.mValues) }, mDeterminant{ std::move(other.mDeterminant) } {}
 
@@ -83,6 +82,10 @@ public:
 		mDeterminant = std::nullopt;
 		return mValues.at(static_cast<size_type>(index));
 	}
+	[[nodiscard]] constexpr T &operator()(const usize _row, const usize _column) { return at(_row, _column); }
+	[[nodiscard]] constexpr T operator()(const usize _row, const usize _column) const { return at(_row, _column); }
+	[[nodiscard]] constexpr T &operator()(const usize index) { return at(index); }
+	[[nodiscard]] constexpr T operator()(const usize index) const { return at(index); }
 
 	enum class Target{ Rows, Columns };
 	constexpr mat &swap(const usize fromId, const usize toId, const Target target = Target::Rows) {
@@ -378,6 +381,10 @@ public:
 		mDeterminant = std::nullopt;
 		return mValues.at(static_cast<size_type>(index));
 	}
+	[[nodiscard]] constexpr T &operator()(const usize _row, const usize _column) { return at(_row, _column); }
+	[[nodiscard]] constexpr T operator()(const usize _row, const usize _column) const { return at(_row, _column); }
+	[[nodiscard]] constexpr T &operator()(const usize index) { return at(index); }
+	[[nodiscard]] constexpr T operator()(const usize index) const { return at(index); }
 
 	enum class Target{ Rows, Columns };
 	constexpr mat &swap(const usize fromId, const usize toId, const Target target = Target::Rows) {
@@ -713,5 +720,3 @@ inline std::ostream &operator<<(std::ostream &out, const golxzn::core::mat<T, Ro
 	}
 	return out;
 }
-
-
