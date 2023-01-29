@@ -4,8 +4,8 @@
 
 namespace golxzn::core {
 
-template<class T, usize Length>
-using vec = point<T, Length>;
+template<class T, usize Count>
+using vec = point<T, Count>;
 
 template<class T> using vec2 = point2<T>;
 

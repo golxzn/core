@@ -6,7 +6,16 @@
 			"name": "flags-unix",
 			"hidden": true,
 			"cacheVariables": {
-				"CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wcast-qual -Wshadow -Wformat=2 -Wundef -Werror=float-equal"
+				"CMAKE_C_FLAGS_INIT": "-Wall",
+				"CMAKE_C_FLAGS_DEBUG_INIT": "-g",
+				"CMAKE_C_FLAGS_MINSIZEREL_INIT": "-Os -DNDEBUG",
+				"CMAKE_C_FLAGS_RELEASE_INIT": "-O3 -DNDEBUG -Wextra -Wpedantic",
+				"CMAKE_C_FLAGS_RELWITHDEBINFO_INIT": "-O2 -g",
+				"CMAKE_CXX_FLAGS_INIT": "-Wall",
+				"CMAKE_CXX_FLAGS_DEBUG_INIT": "-g",
+				"CMAKE_CXX_FLAGS_MINSIZEREL_INIT": "-Os -DNDEBUG",
+				"CMAKE_CXX_FLAGS_RELEASE_INIT": "-O3 -DNDEBUG -Wextra -Wpedantic",
+				"CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT": "-O2 -g"
 			}
 		},
 		{
