@@ -1,15 +1,15 @@
 #pragma once
 
-#include <iomanip>
 #include <array>
-#include <limits>
-#include <algorithm>
+#include <iomanip>
 #include <optional>
+#include <algorithm>
+#include <execution>
 
 #include <golxzn/core/export.hpp>
-#include <golxzn/core/types.hpp>
+#include <golxzn/core/math/vector.hpp>
 #include <golxzn/core/utils/error.hpp>
-#include <golxzn/core/utils/traits.hpp>
+#include <golxzn/core/utils/numeric.hpp>
 
 namespace golxzn::core {
 
@@ -25,7 +25,7 @@ class GOLXZN_EXPORT mat {
 	template<class T> struct _submat<T, 0, 0> { using value = submat_error_value; };
 
 public:
-	using submat = typename _submat<T, Rows, Columns>::value;
+	using submat_type = typename _submat<T, Rows, Columns>::value;
 	using inverse_matrix = mat<f32, Rows, Columns>;
 	using transpositioned_matrix = mat<T, Columns, Rows>;
 	using value_type = T;
@@ -104,7 +104,7 @@ public:
 	}
 
 	[[nodiscard]] constexpr T determinant() const { return 0; }
-	[[nodiscard]] constexpr bool isInvertible() const { return false; }
+	[[nodiscard]] constexpr bool is_invertible() const { return false; }
 
 	[[nodiscard]] constexpr T *data() {
 		mDeterminant = std::nullopt;
@@ -126,14 +126,14 @@ public:
 		return std::nullopt;
 	}
 
-	constexpr mat &makeIdentity() {
+	constexpr mat &make_identity() {
 		mDeterminant = std::nullopt;
 		mValues = identityValues();
 		return *this;
 	}
-	constexpr mat &makeZero() {
+	constexpr mat &make_zero() {
 		mDeterminant = std::nullopt;
-		std::fill_n(mValues, mValues.size(), static_cast<T>(0));
+		std::fill_n(std::execution::par, std::begin(mValues), mValues.size(), static_cast<T>(0));
 		return *this;
 	}
 
@@ -162,11 +162,11 @@ public:
 		return transpositioned_matrix{ std::move(result) };
 	}
 
-	[[nodiscard]] constexpr submat subMatrix(const usize row, const usize column) const {
-		if constexpr (std::is_same_v<submat, submat_error_value>) return;
+	[[nodiscard]] constexpr submat_type submat(const usize row, const usize column) const {
+		if constexpr (std::is_same_v<submat_type, submat_error_value>) return;
 		if constexpr (columns() == 1 || rows() == 1) return;
 
-		submat result;
+		submat_type result;
 		#pragma omp parallel for
 		for (usize _row{}; _row < rows(); ++_row) {
 			if (_row == row) continue;
@@ -187,7 +187,7 @@ public:
 
 		for (usize index{}; index < length(); ++index) {
 			if constexpr (std::is_floating_point_v<T>) {
-				if (std::abs(at(index) - other.at(index)) > std::numeric_limits<T>::epsilon()) {
+				if (!utils::numeric::approximately::are_equal(at(index), other.at(index))) {
 					return false;
 				}
 			} else {
@@ -206,26 +206,26 @@ public:
 	}
 
 	constexpr mat &operator+=(const mat &other) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(other.mValues),
-			std::begin(mValues), std::plus<int>());
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(other.mValues), std::begin(mValues), std::plus<int>());
 		mDeterminant = std::nullopt;
 		return *this;
 	}
 	constexpr mat &operator-=(const mat &other) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(other.mValues),
-			std::begin(mValues), std::minus<int>());
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(other.mValues), std::begin(mValues), std::minus<int>());
 		mDeterminant = std::nullopt;
 		return *this;
 	}
 	constexpr mat &operator*=(const T &value) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(mValues),
-			[&value](const T &elem) { return elem * value; });
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(mValues), [&value](const T &elem) { return elem * value; });
 		mDeterminant = std::nullopt;
 		return *this;
 	}
 	constexpr mat &operator/=(const T &value) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(mValues),
-			[&value](const T &elem) { return elem / value; });
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(mValues), [&value](const T &elem) { return elem / value; });
 		mDeterminant = std::nullopt;
 		return *this;
 	}
@@ -240,6 +240,10 @@ public:
 	}
 	[[nodiscard]] constexpr mat operator/(const T &value) const {
 		return mat{ *this } /= value;
+	}
+
+	constexpr mat &operator*=(const mat &other) {
+		return *this = (*this) * other;
 	}
 
 	template<size_t OtherColumns>
@@ -258,6 +262,23 @@ public:
 		}
 
 		return result_matrix{ std::move(result) };
+	}
+
+	[[nodiscard]] constexpr vec<T, Rows> operator*(const vec<T, Rows> &other) const {
+		vec<T, Rows> result{};
+
+		#pragma omp parallel for
+		for (usize row{}; row < rows(); ++row) {
+			for (usize column{}; column < columns(); ++column) {
+				result.at(static_cast<size_type>(row)) += at(row, column) * other.at(column);
+			}
+		}
+
+		return result;
+	}
+
+	[[nodiscard]] constexpr mat operator-() const {
+		return mat{ *this } *= -1;
 	}
 
 	[[nodiscard]] constexpr typename values_container::iterator               begin()   noexcept       { return mValues.begin();  }
@@ -317,7 +338,7 @@ public:
 	template<class ValueType>
 	using separate_matrix_param = mat<ValueType, Dimension, Dimension>;
 
-	using submat = typename _submat<T, Dimension, Dimension>::value;
+	using submat_type = typename _submat<T, Dimension, Dimension>::value;
 	using inverse_matrix = mat<f32, Dimension, Dimension>;
 	using transpositioned_matrix = mat<T, Dimension, Dimension>;
 	using value_type = T;
@@ -419,15 +440,15 @@ public:
 		static constexpr auto sign{ [](const size_type id) { return ((id % 2 == 0) ? 1 : -1); } };
 		#pragma omp parallel for
 		for (size_type i = 0; i < columns(); ++i) {
-			if constexpr (!std::is_same_v<submat, submat_error_value>) {
-				det += mValues.at(i) * subMatrix(0, i).determinant() * sign(i);
+			if constexpr (!std::is_same_v<submat_type, submat_error_value>) {
+				det += mValues.at(i) * submat(0, i).determinant() * sign(i);
 			}
 		}
 		mDeterminant = std::make_optional(det);
 		return det;
 	}
 
-	[[nodiscard]] constexpr bool isInvertible() const {
+	[[nodiscard]] constexpr bool is_invertible() const {
 		return determinant() != 0;
 	}
 
@@ -448,20 +469,20 @@ public:
 	}
 
 	constexpr std::optional<inverse_matrix> inverse() const {
-		if (!isInvertible()) return std::nullopt;
+		if (!is_invertible()) return std::nullopt;
 
 		inverse_matrix result{};
 		return result;
 	}
 
-	constexpr mat &makeIdentity() {
+	constexpr mat &make_identity() {
 		mDeterminant = std::nullopt;
 		mValues = identityValues();
 		return *this;
 	}
-	constexpr mat &makeZero() {
+	constexpr mat &make_zero() {
 		mDeterminant = std::nullopt;
-		std::fill_n(mValues, mValues.size(), static_cast<T>(0));
+		std::fill_n(std::execution::par, std::begin(mValues), mValues.size(), static_cast<T>(0));
 		return *this;
 	}
 
@@ -505,12 +526,12 @@ public:
 		return transpositioned_matrix{ std::move(result) };
 	}
 
-	[[nodiscard]] constexpr submat subMatrix(const usize row, const usize column) const {
-		if constexpr (std::is_same_v<submat, submat_error_value>) return {};
+	[[nodiscard]] constexpr submat_type submat(const usize row, const usize column) const {
+		if constexpr (std::is_same_v<submat_type, submat_error_value>) return {};
 		if constexpr (columns() == 1 || rows() == 1) return {};
 		if (columns() == 1 || rows() == 1) return {};
 
-		submat result;
+		submat_type result;
 		#pragma omp parallel for
 		for (usize _row{}; _row < rows(); ++_row) {
 			if (_row == row) continue;
@@ -548,7 +569,7 @@ public:
 
 		for (usize index{}; index < length(); ++index) {
 			if constexpr (std::is_floating_point_v<T>) {
-				if (std::abs(at(index) - other.at(index)) > std::numeric_limits<T>::epsilon()) {
+				if (!utils::numeric::approximately::are_equal(at(index), other.at(index))) {
 					return false;
 				}
 			} else {
@@ -567,26 +588,26 @@ public:
 	}
 
 	constexpr mat &operator+=(const mat &other) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(other.mValues),
-			std::begin(mValues), std::plus<int>());
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(other.mValues), std::begin(mValues), std::plus<int>());
 		mDeterminant = std::nullopt;
 		return *this;
 	}
 	constexpr mat &operator-=(const mat &other) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(other.mValues),
-			std::begin(mValues), std::minus<int>());
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(other.mValues), std::begin(mValues), std::minus<int>());
 		mDeterminant = std::nullopt;
 		return *this;
 	}
 	constexpr mat &operator*=(const T &value) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(mValues),
-			[&value](const T &elem) { return elem * value; });
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(mValues), [&value](const T &elem) { return elem * value; });
 		mDeterminant = std::nullopt;
 		return *this;
 	}
 	constexpr mat &operator/=(const T &value) {
-		std::transform(std::begin(mValues), std::end(mValues), std::begin(mValues),
-			[&value](const T &elem) { return elem / value; });
+		std::transform(std::execution::par, std::begin(mValues), std::end(mValues),
+			std::begin(mValues), [&value](const T &elem) { return elem / value; });
 		mDeterminant = std::nullopt;
 		return *this;
 	}
@@ -608,6 +629,10 @@ public:
 		return separate(other);
 	}
 
+	constexpr mat &operator*=(const mat &other) {
+		return *this = (*this) * other;
+	}
+
 	template<size_t OtherColumns>
 	[[nodiscard]] constexpr mat<T, OtherColumns, Dimension> operator*(const mat<T, Dimension, OtherColumns> &other) const {
 		using result_matrix = mat<T, OtherColumns, Dimension>;
@@ -624,6 +649,23 @@ public:
 		}
 
 		return result_matrix{ std::move(result) };
+	}
+
+	[[nodiscard]] constexpr vec<T, Dimension> operator*(const vec<T, Dimension> &other) const {
+		vec<T, Dimension> result{};
+
+		#pragma omp parallel for
+		for (usize row{}; row < rows(); ++row) {
+			for (usize column{}; column < columns(); ++column) {
+				result.at(static_cast<size_type>(row)) += at(row, column) * other.at(column);
+			}
+		}
+
+		return result;
+	}
+
+	[[nodiscard]] constexpr mat operator-() const {
+		return mat{ *this } *= -1;
 	}
 
 	[[nodiscard]] constexpr typename values_container::iterator               begin()   noexcept       { return mValues.begin();  }

@@ -1,6 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
+#include <golxzn/core/math/vector.hpp>
 #include <golxzn/core/geometry/transform2D.hpp>
 #include <golxzn/core/geometry/transform3D.hpp>
+
+#include <iostream>
+#include <sstream>
 
 TEST_CASE("Transform2D", "[geometry]") {
 	using namespace golxzn::core;
@@ -34,10 +38,15 @@ TEST_CASE("Transform2D", "[geometry]") {
 		REQUIRE(transform.position() == vec2f32{ 2.0_f32, 2.0_f32 });
 		transform.scale(3.0_f32, 3.0_f32);
 		REQUIRE(transform.size() == vec2f32{ 3.0_f32, 3.0_f32 });
-
-		// TODO: Add tests for shear() and rotate()
-		transform.shear(30_deg, 30_deg);
+		REQUIRE((transform * vec2f32{ 1.0_f32, 1.0_f32 }) == vec2f32{ 5.0_f32, 5.0_f32 });
 		transform.rotate(45_deg);
+		const auto rotated{ transform * vec2f32{ 1.0_f32, 1.0_f32 } };
+		std::stringstream info;
+		info << rotated << " != " << vec2f32{ 0.0_f32, 7.071_f32 };
+		INFO(info.str());
+		REQUIRE(rotated == vec2f32{ 0.0_f32, 7.071_f32 });
+		transform.shear(30_deg, 30_deg);
+		REQUIRE((transform * vec2f32{ 1.0_f32, 1.0_f32 }) == vec2f32{ 4.949_f32, 4.949_f32 });
 	}
 	// TODO: Add tests for methods and setPivot()
 }
@@ -78,6 +87,6 @@ TEST_CASE("Transform3D", "[geometry]") {
 
 		// TODO: Add tests for shear() and rotate()
 		transform.shear(30_deg, 30_deg, 30_deg);
-		transform.rotate(45_deg, vec3f32{ 1.0_f32, 1.0_f32, 0.0_f32 });
+		transform.rotate(45_deg, get_axis<f32, 3, axis::Y>());
 	}
 }

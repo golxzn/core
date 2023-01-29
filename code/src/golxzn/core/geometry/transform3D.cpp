@@ -82,5 +82,37 @@ Transform3D &Transform3D::reset() {
 	return *this;
 }
 
+Transform3D &Transform3D::operator*=(const Transform3D &rhs) {
+	mMatrix *= rhs.mMatrix;
+	return *this;
+}
+Transform3D Transform3D::operator*(const Transform3D &rhs) const {
+	return Transform3D{ *this } *= rhs;
+}
+vec4f32 Transform3D::operator*(const vec4f32 &rhs) const {
+	return mMatrix * rhs;
+}
+vec3f32 Transform3D::operator*(const vec3f32 &rhs) const {
+	using namespace types_literals;
+	return operator*(vec4f32{ rhs.at(0), rhs.at(1), rhs.at(2), vec4f32::one })
+		.as<3>({ 0_usize, 1_usize, 2_usize });
+}
+
+Transform3D &Transform3D::apply(vec4f32 &vector) {
+	vector = operator*(vector);
+	return *this;
+}
+Transform3D &Transform3D::apply(vec3f32 &vector) {
+	vector = operator*(vector);
+	return *this;
+}
+void Transform3D::apply(vec4f32 &vector) const {
+	vector = operator*(vector);
+}
+void Transform3D::apply(vec3f32 &vector) const {
+	vector = operator*(vector);
+}
+
+
 
 } // namespace golxzn::core::geometry

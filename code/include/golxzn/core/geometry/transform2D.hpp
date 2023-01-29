@@ -43,7 +43,18 @@ public:
 	Transform2D &shear(const math::anglef32 phi, const math::anglef32 psi);
 
 	Transform2D &rotate(const math::anglef32 degrees);
+	Transform2D &rotate_opt(const math::anglef32 degrees);
 	Transform2D &reset();
+
+	Transform2D &operator*=(const Transform2D &rhs) ;
+	[[nodiscard]] Transform2D operator*(const Transform2D &rhs) const;
+	[[nodiscard]] vec3f32 operator*(const vec3f32 &point) const;
+	[[nodiscard]] vec2f32 operator*(const vec2f32 &point) const;
+
+	Transform2D &apply(vec3f32 &point);
+	Transform2D &apply(vec2f32 &point);
+	void apply(vec3f32 &point) const;
+	void apply(vec2f32 &point) const;
 
 private:
 	mat3f32 mMatrix{};

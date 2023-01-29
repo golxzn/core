@@ -47,6 +47,16 @@ public:
 	Transform3D &rotate(const math::anglef32 degrees, const vec3f32 &axis);
 	Transform3D &reset();
 
+	Transform3D &operator*=(const Transform3D &rhs) ;
+	[[nodiscard]] Transform3D operator*(const Transform3D &rhs) const;
+	[[nodiscard]] vec4f32 operator*(const vec4f32 &point) const;
+	[[nodiscard]] vec3f32 operator*(const vec3f32 &point) const;
+
+	Transform3D &apply(vec4f32 &point);
+	Transform3D &apply(vec3f32 &point);
+	void apply(vec4f32 &point) const;
+	void apply(vec3f32 &point) const;
+
 private:
 	mat4f32 mMatrix{};
 	vec3f32 mPivot{ DefaultPivot };
