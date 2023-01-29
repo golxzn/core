@@ -48,6 +48,9 @@ namespace types_literals {
 [[nodiscard]] constexpr f32 operator""_f32(const u64 value) noexcept { return static_cast<f32>(value); }
 [[nodiscard]] constexpr f64 operator""_f64(const u64 value) noexcept { return static_cast<f64>(value); }
 
+[[nodiscard]] constexpr size operator""_size(const u64 value) noexcept { return static_cast<size>(value); }
+[[nodiscard]] constexpr usize operator""_usize(const u64 value) noexcept { return static_cast<usize>(value); }
+
 } // namespace types_literals
 
 #if defined(GOLXZN_BOOSTED)
