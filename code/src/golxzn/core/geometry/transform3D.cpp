@@ -50,14 +50,14 @@ Transform3D &Transform3D::scale(const f32 _scale) {
 	return scale(_scale, _scale, _scale);
 }
 
-Transform3D &Transform3D::shear(const math::anglef32 xsh, const math::anglef32 ysh, const math::anglef32 zsh) {
+Transform3D &Transform3D::shear(const anglef32 xsh, const anglef32 ysh, const anglef32 zsh) {
 	mMatrix(0, 1) = xsh.tan();
 	mMatrix(0, 2) = zsh.tan();
 	mMatrix(1, 2) = ysh.tan();
 	return *this;
 }
 
-Transform3D &Transform3D::rotate(const math::anglef32 degrees, const vec3f32 &axis) {
+Transform3D &Transform3D::rotate(const anglef32 degrees, const vec3f32 &axis) {
 	translate(-mPivot);
 	const auto cos{ degrees.cos() };
 	const auto sin{ degrees.sin() };

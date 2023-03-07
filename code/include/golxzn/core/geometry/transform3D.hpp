@@ -3,7 +3,7 @@
 #include <optional>
 #include <golxzn/core/math/matrix.hpp>
 #include <golxzn/core/math/vector.hpp>
-#include <golxzn/core/math/angle.hpp>
+#include <golxzn/core/types/angle.hpp>
 
 namespace golxzn::core::geometry {
 
@@ -42,9 +42,9 @@ public:
 	Transform3D &scale(const vec3f32 &scale);
 	Transform3D &scale(const f32 scale);
 
-	Transform3D &shear(const math::anglef32 xsh, const math::anglef32 ysh, const math::anglef32 zsh);
+	Transform3D &shear(const anglef32 xsh, const anglef32 ysh, const anglef32 zsh);
 
-	Transform3D &rotate(const math::anglef32 degrees, const vec3f32 &axis);
+	Transform3D &rotate(const anglef32 degrees, const vec3f32 &axis);
 	Transform3D &reset();
 
 	Transform3D &operator*=(const Transform3D &rhs) ;

@@ -2,7 +2,7 @@
 
 #include <golxzn/core/math/matrix.hpp>
 #include <golxzn/core/math/vector.hpp>
-#include <golxzn/core/math/angle.hpp>
+#include <golxzn/core/types/angle.hpp>
 
 namespace golxzn::core::geometry {
 
@@ -40,10 +40,10 @@ public:
 	Transform2D &scale(const vec2f32 &scale);
 	Transform2D &scale(const f32 scale);
 
-	Transform2D &shear(const math::anglef32 phi, const math::anglef32 psi);
+	Transform2D &shear(const anglef32 phi, const anglef32 psi);
 
-	Transform2D &rotate(const math::anglef32 degrees);
-	Transform2D &rotate_opt(const math::anglef32 degrees);
+	Transform2D &rotate(const anglef32 degrees);
+	Transform2D &rotate_opt(const anglef32 degrees);
 	Transform2D &reset();
 
 	Transform2D &operator*=(const Transform2D &rhs) ;

@@ -4,7 +4,7 @@
 #include <golxzn/core/constants.hpp>
 #include <variant>
 
-namespace golxzn::core::math {
+namespace golxzn::core {
 
 template<class ValueType>
 class angle {
@@ -105,63 +105,63 @@ using anglef64 = angle<f64>;
 namespace angle_literals {
 
 [[nodiscard]] constexpr auto operator""_deg(const f64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::degrees{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::degrees{ static_cast<f32>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_deg(const u64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::degrees{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::degrees{ static_cast<f32>(value) } };
 }
 
 [[nodiscard]] constexpr auto operator""_degf64(const f64 value) noexcept {
-	return core::math::angle<f64>{ core::math::angle<f64>::degrees{ static_cast<f64>(value) } };
+	return core::angle<f64>{ core::angle<f64>::degrees{ static_cast<f64>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_degf32(const f64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::degrees{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::degrees{ static_cast<f32>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_degf16(const f64 value) noexcept {
-	return core::math::angle<f16>{ core::math::angle<f16>::degrees{ static_cast<f16>(value) } };
+	return core::angle<f16>{ core::angle<f16>::degrees{ static_cast<f16>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_degf64(const u64 value) noexcept {
-	return core::math::angle<f64>{ core::math::angle<f64>::degrees{ static_cast<f64>(value) } };
+	return core::angle<f64>{ core::angle<f64>::degrees{ static_cast<f64>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_degf32(const u64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::degrees{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::degrees{ static_cast<f32>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_degf16(const u64 value) noexcept {
-	return core::math::angle<f16>{ core::math::angle<f16>::degrees{ static_cast<f16>(value) } };
+	return core::angle<f16>{ core::angle<f16>::degrees{ static_cast<f16>(value) } };
 }
 
 [[nodiscard]] constexpr auto operator""_rad(const f64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::radians{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::radians{ static_cast<f32>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_rad(const u64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::radians{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::radians{ static_cast<f32>(value) } };
 }
 
 [[nodiscard]] constexpr auto operator""_radf64(const f64 value) noexcept {
-	return core::math::angle<f64>{ core::math::angle<f64>::radians{ static_cast<f64>(value) } };
+	return core::angle<f64>{ core::angle<f64>::radians{ static_cast<f64>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_radf32(const f64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::radians{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::radians{ static_cast<f32>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_radf16(const f64 value) noexcept {
-	return core::math::angle<f16>{ core::math::angle<f16>::radians{ static_cast<f16>(value) } };
+	return core::angle<f16>{ core::angle<f16>::radians{ static_cast<f16>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_radf64(const u64 value) noexcept {
-	return core::math::angle<f64>{ core::math::angle<f64>::radians{ static_cast<f64>(value) } };
+	return core::angle<f64>{ core::angle<f64>::radians{ static_cast<f64>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_radf32(const u64 value) noexcept {
-	return core::math::angle<f32>{ core::math::angle<f32>::radians{ static_cast<f32>(value) } };
+	return core::angle<f32>{ core::angle<f32>::radians{ static_cast<f32>(value) } };
 }
 [[nodiscard]] constexpr auto operator""_radf16(const u64 value) noexcept {
-	return core::math::angle<f16>{ core::math::angle<f16>::radians{ static_cast<f16>(value) } };
+	return core::angle<f16>{ core::angle<f16>::radians{ static_cast<f16>(value) } };
 }
 
 
 } // namespace angle_literals
 
-} // namespace golxzn::core::math
+} // namespace golxzn::core
 
 namespace golxzn {
-namespace angle_literals = core::math::angle_literals;
+namespace angle_literals = core::angle_literals;
 } // namespace golxzn
 

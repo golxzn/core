@@ -62,13 +62,13 @@ Transform2D &Transform2D::scale(const f32 _scale) {
 	return scale(_scale, _scale);
 }
 
-Transform2D &Transform2D::shear(const math::anglef32 phi, const math::anglef32 psi) {
+Transform2D &Transform2D::shear(const anglef32 phi, const anglef32 psi) {
 	mMatrix(0, 1) = phi.tan();
 	mMatrix(1, 0) = psi.tan();
 	return *this;
 }
 
-Transform2D &Transform2D::rotate(const math::anglef32 degrees) {
+Transform2D &Transform2D::rotate(const anglef32 degrees) {
 	translate(-mPivot);
 	const f32 sin{ degrees.sin() };
 	const f32 cos{ degrees.cos() };
@@ -84,7 +84,7 @@ Transform2D &Transform2D::rotate(const math::anglef32 degrees) {
 	return translate(mPivot);
 }
 
-Transform2D &Transform2D::rotate_opt(const math::anglef32 degrees) {
+Transform2D &Transform2D::rotate_opt(const anglef32 degrees) {
 	translate(-mPivot);
 	const f32 sin{ degrees.sin() };
 	const f32 cos{ degrees.cos() };
