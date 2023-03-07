@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 
-include(cmake/prelude.cmake)
+set(root ${CMAKE_CURRENT_SOURCE_DIR})
+include(${root}/cmake/prelude.cmake)
 
 project(golxzn_core
-	VERSION 0.2.3
+	VERSION 0.2.4
 	DESCRIPTION "[golxzn] basic stuff for the gxen game enging"
 	HOMEPAGE_URL https://github.com/golxzn/core
 	LANGUAGES CXX
 )
-include(options)
+include(${root}/cmake/options.cmake)
 
 load_sources_list(headers ${GOLXZNC_INCLUDE_DIR} ".h;.hpp")
 load_sources_list(sources ${GOLXZNC_SOURCES_DIR} ".cpp")
@@ -23,7 +24,7 @@ generate_export_header(${target}_lib
 	CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
 )
 if(NOT BUILD_SHARED_LIBS)
-	target_compile_definitions(${target}_lib PUBLIC GOLXZN_STATIC_DEFINE)
+	target_compile_definitions(${target}_lib PRIVATE GOLXZN_STATIC_DEFINE)
 endif()
 
 set_target_properties(${target}_lib

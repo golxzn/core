@@ -1,7 +1,5 @@
 # ---- In-source guard ----
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
-message(STATUS "CMake module path: ${CMAKE_MODULE_PATH}")
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 	message(FATAL_ERROR
 		"In-source builds are not supported. "
@@ -15,4 +13,4 @@ if(${CMAKE_VERSION} VERSION_LESS "3.21.0")
 	string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}" PROJECT_IS_TOP_LEVEL)
 endif()
 
-include(tools)
+include(${root}/cmake/tools.cmake)

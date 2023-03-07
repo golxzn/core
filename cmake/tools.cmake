@@ -2,7 +2,7 @@
 function(load_sources_list result path extensions)
 	set(sources "")
 	foreach(ext IN LISTS extensions)
-		file(GLOB_RECURSE additional ${path}/*${ext})
+		file(GLOB_RECURSE additional CONFIGURE_DEPENDS ${path}/*${ext})
 		list(APPEND sources ${additional})
 	endforeach()
 

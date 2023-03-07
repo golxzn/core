@@ -35,7 +35,7 @@ set(${package}_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${package}"
 )
 mark_as_advanced(${package}_INSTALL_CMAKEDIR)
 
-install(FILES cmake/install/config.cmake
+install(FILES ${root}/cmake/install/config.cmake
 	DESTINATION "${${package}_INSTALL_CMAKEDIR}"
 	RENAME "${package}Config.cmake"
 	COMPONENT ${package}_Development
@@ -55,3 +55,4 @@ install(EXPORT ${package}Targets
 if(PROJECT_IS_TOP_LEVEL)
 	include(CPack)
 endif()
+unset(package)

@@ -1,6 +1,5 @@
 
-set(target ${CMAKE_PROJECT_NAME})
-set(root ${CMAKE_CURRENT_SOURCE_DIR})
+set(target golxzn_core)
 set(definitions "")
 set(includes)
 set(libraries "")
@@ -31,7 +30,7 @@ if(GOLXZNC_DEVELOPER_MODE)
 	option(ENABLE_COVERAGE "Enable coverage support separate from CTest's" OFF)
 endif()
 
-include(cmake/config.cmake)
+include(${root}/cmake/config.cmake)
 
 message(STATUS "-- -- -- -- -- -- -- -- -- -- -- -- Variables -- -- -- -- -- -- -- -- -- -- -- -- --")
 message(STATUS "Target:                         | ${target}")
