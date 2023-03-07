@@ -1,1 +1,0 @@
-constexpr int lol(int a, int b) { return a + b; }
