@@ -64,3 +64,26 @@ function(get_cpm)
 
 	include(${CPM_DOWNLOAD_LOCATION})
 endfunction()
+
+macro(get_param_name name)
+	string(FIND ${param} " " __param_name_sep)
+	string(SUBSTRING ${param} 0 ${__param_name_sep} __param_name)
+	set(${name} ${__param_name})
+	unset(__param_name_sep)
+	unset(__param_name)
+endmacro()
+
+function(add_subdirectory_params directory)
+	foreach(param IN LISTS ARGN)
+		get_param_name(param_name)
+		set(${param_name}_value ${param_name})
+		set(${param})
+	endforeach()
+
+	add_subdirectory(${directory} ${ADD_SUBDIR_PAR_bin_dir} ${ADD_SUBDIR_PAR_exclude})
+
+	foreach(param IN LISTS ARGN)
+		get_param_name(param_name)
+		set(${param_name} ${${param_name}_value})
+	endforeach()
+endfunction()

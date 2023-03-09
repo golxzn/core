@@ -1,0 +1,9 @@
+[submodule "dependencies/spdlog"]
+	path = dependencies/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "dependencies/PlatformFolders"]
+	path = dependencies/PlatformFolders
+	url = https://github.com/sago007/PlatformFolders.git
+[submodule "dependencies/filesystem"]
+	path = dependencies/filesystem
+	url = https://github.com/gulrak/filesystem.git

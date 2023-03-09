@@ -9,10 +9,18 @@
 <h2>📜 Table of contents </h2>
 
 - [🧱 Project structure](#-project-structure)
+  - [Dependencies](#dependencies)
   - [Modules](#modules)
 - [⚖️ Licensing](#️-licensing)
 
 ## 🧱 Project structure
+
+### Dependencies
+
+- CMake 3.23 or higher;
+- [spdlog::spdlog](https://github.com/gabime/spdlog.git) (MIT License);
+- [sago::platform_folders](https://github.com/sago007/PlatformFolders) (MIT License);
+- [ghcFilesystem::ghc_filesystem](https://github.com/gulrak/filesystem) (MIT License).
 
 ### Modules
 - __math__: <golxzn/core/math.hpp>;
@@ -21,6 +29,8 @@
   - matrix: <golxzn/core/math/matrix.hpp>
 - __types__:
   - angle: <golxzn/core/types/angle.hpp>
+- __resources__:
+  - manager: <golxzn/core/resources/manager.hpp>
 - __utils__: <golxzn/core/utils.hpp>;
   - error: <golxzn/core/utils/error.hpp>
   - numeric: <golxzn/core/utils/numeric.hpp>

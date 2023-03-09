@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+#include <limits>
 #include <golxzn/core/utils/traits.hpp>
 
 namespace golxzn::core::utils::numeric {

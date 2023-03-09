@@ -1,5 +1,7 @@
 #pragma once
 
+#define NOMINMAX
+
 #if defined(GOLXZN_BOOSTED)
 	#include <boost/unordered_map.hpp>
 #else
@@ -9,6 +11,7 @@
 #include <memory>
 #include <cstdint>
 #include <type_traits>
+#include <ghc/filesystem.hpp>
 
 namespace golxzn::core {
 
@@ -74,6 +77,19 @@ using uptr = std::unique_ptr<T, Deleter>;
 template<class T>
 using wptr = std::weak_ptr<T>;
 
+namespace fs {
+
+using namespace ghc::filesystem;
+using ifstream = ifstream;
+using ofstream = ofstream;
+using fstream = fstream;
+
+using bifstream = basic_ifstream<byte, std::char_traits<byte>>;
+using bofstream = basic_ofstream<byte, std::char_traits<byte>>;
+
+} // namespace fs
+
+
 } // namespace golxzn::core
 
 namespace golxzn {
@@ -81,3 +97,19 @@ namespace golxzn {
 namespace types_literals = core::types_literals;
 
 } // namespace golxzn
+
+#define GOLXZN_STATIC_CLASS(classname) \
+	classname() = delete; \
+	classname(const classname &) = delete; \
+	classname(classname &&) = delete; \
+	classname &operator=(const classname &) = delete; \
+	classname &operator=(classname &&) = delete; \
+	~classname() = default
+
+#define GOLXZN_DEFAULT_CLASS(classname) \
+	classname() noexcept = default; \
+	classname(const classname &) = default; \
+	classname(classname &&) = default; \
+	classname &operator=(const classname &) = default; \
+	classname &operator=(classname &&) = default; \
+	~classname() = default

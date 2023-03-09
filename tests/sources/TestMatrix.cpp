@@ -123,8 +123,8 @@ TEST_CASE("mat<T, Columns, Rows>", "[golxzn][core][tests]") {
 			return values.begin()[core::mat2<core::i32>::index(row, column)];
 		});
 
-		const core::mat2<core::i32> small{ 0_i32, 1_i32, 2_i32, 3_i32 };
-		const auto subsmall{ small.submat(0_usize, 0_usize) };
+		const core::mat2<core::i32> small_mat{ 0_i32, 1_i32, 2_i32, 3_i32 };
+		const auto subsmall{ small_mat.submat(0_usize, 0_usize) };
 		REQUIRE(subsmall.rows() == 1_i32);
 		REQUIRE(subsmall.columns() == 1_i32);
 		REQUIRE(subsmall.at(0_usize, 0_usize) == 3_i32);
