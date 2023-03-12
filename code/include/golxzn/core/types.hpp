@@ -11,6 +11,7 @@
 #include <memory>
 #include <cstdint>
 #include <type_traits>
+#include <unordered_set>
 #include <ghc/filesystem.hpp>
 
 namespace golxzn::core {
@@ -67,6 +68,10 @@ namespace types_literals {
 		class Alloc = std::allocator<std::pair<const Key, Mapped>>>
 	using umap = std::unordered_map<Key, Mapped, Hash, KeyEqual, Alloc>;
 #endif
+
+template<class Key, class Hash = std::hash<Key>, class KeyEqual = std::equal_to<Key>,
+	class Alloc = std::allocator<Key>>
+using uset = std::unordered_set<Key, Hash, KeyEqual, Alloc>;
 
 template<class T>
 using sptr = std::shared_ptr<T>;
