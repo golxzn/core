@@ -51,7 +51,7 @@ target_include_directories(${target}_lib SYSTEM
 		"$<INSTALL_INTERFACE:export>"
 )
 
-include(${GOLXZNC_DEPENDENCIED_DIR}/import.cmake)
+include(${GOLXZNC_DEPENDENCIES_DIR}/import.cmake)
 
 target_link_libraries(${target}_lib PUBLIC ${libraries})
 target_include_directories(${target}_lib PUBLIC ${includes})

@@ -41,11 +41,11 @@ std::vector<u8> manager::load_binary(const std::string_view path) {
 		if (const auto &found{ load_handlers.find(url) }; found != std::end(load_handlers)) {
 			return found->second(path);
 		} else {
-			spdlog::error("[{}]: Unknown URL: '{}' in path '{}'", class_name, url, path);
+			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return {};
 	}
-	spdlog::error("[{}]: Cannot find URL in path '{}'", class_name, path);
+	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return {};
 }
 
@@ -64,11 +64,11 @@ bool manager::save_binary(const std::string_view path, const std::vector<u8> &da
 		if (const auto &found{ save_handlers.find(url) }; found != std::end(save_handlers)) {
 			return found->second(path, data.data(), data.size());
 		} else {
-			spdlog::error("[{}]: Unknown URL: '{}' in path '{}'", class_name, url, path);
+			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return false;
 	}
-	spdlog::error("[{}]: Cannot find URL in path '{}'", class_name, path);
+	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return false;
 }
 bool manager::save_string(const std::string_view path, const std::string_view data) {
@@ -80,11 +80,11 @@ bool manager::save_string(const std::string_view path, const std::string_view da
 		if (const auto &found{ save_handlers.find(url) }; found != std::end(save_handlers)) {
 			return found->second(path, reinterpret_cast<const u8 *>(data.data()), data.size());
 		} else {
-			spdlog::error("[{}]: Unknown URL: '{}' in path '{}'", class_name, url, path);
+			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return false;
 	}
-	spdlog::error("[{}]: Cannot find URL in path '{}'", class_name, path);
+	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return false;
 }
 
@@ -113,7 +113,7 @@ std::vector<u8> manager::load_from(const fs::path &path) {
 	return {};
 }
 std::vector<u8> manager::load_from_http(const fs::path &path) {
-	spdlog::error("[{}]: load_from_http isn't implemented yet", class_name);
+	spdlog::error("[{}] load_from_http isn't implemented yet", class_name);
 	return {};
 }
 
@@ -139,7 +139,7 @@ bool manager::save_to_http(const fs::path &path, const u8 *data, const u32 size)
 	if (!path.has_filename() || size == 0 || data == nullptr)
 		return false;
 	/// @todo: Implement loading file from the web
-	spdlog::error("[{}]: save_to_http isn't implemented yet", class_name);
+	spdlog::error("[{}] save_to_http isn't implemented yet", class_name);
 	return false;
 }
 
@@ -161,7 +161,7 @@ void manager::setup_assets_root(const std::string_view assets_name) {
 			const auto current{ directory / targetDir };
 			if (fs::exists(current, err)) {
 				assets_root = current;
-				spdlog::info("[{}]: Assets directory was found in '{}'",
+				spdlog::info("[{}] Assets directory was found in '{}'",
 					class_name, assets_root.string());
 				return;
 			}
@@ -169,7 +169,7 @@ void manager::setup_assets_root(const std::string_view assets_name) {
 		assets_root = assets_root.parent_path();
 	}
 	assets_root = fs::current_path(err) / targetDir;
-	spdlog::warn("[{}]: Cannot find '{}' directory. Creating in '{}'",
+	spdlog::warn("[{}] Cannot find '{}' directory. Creating in '{}'",
 		class_name, targetDir.string(), assets_root.string());
 	fs::create_directories(assets_root, err);
 }
@@ -181,7 +181,7 @@ void manager::setup_user_root(const std::string_view app_name) {
 		fs::create_directories(user_root, err);
 	}
 
-	spdlog::info("[{}]: User directory was found in '{}'", class_name, user_root.string());
+	spdlog::info("[{}] User directory was found in '{}'", class_name, user_root.string());
 }
 
 } // namespace golxzn::core::resources
