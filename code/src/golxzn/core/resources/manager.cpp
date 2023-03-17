@@ -32,7 +32,7 @@ void manager::initialize(const std::string_view application_name, const std::str
 void manager::set_write_mode(const WriteMode mode) noexcept { write_mode = mode; }
 void manager::reset_write_mode() noexcept { write_mode = WriteMode::Rewrite; }
 
-std::vector<u8> manager::load_binary(const std::string_view path) {
+bytes manager::load_binary(const std::string_view path) {
 	if (path.empty())
 		return {};
 
@@ -55,7 +55,7 @@ std::string manager::load_string(const std::string_view path) {
 	return {};
 }
 
-bool manager::save_binary(const std::string_view path, const std::vector<u8> &data) {
+bool manager::save_binary(const std::string_view path, const bytes &data) {
 	if (path.empty() || data.empty())
 		return false;
 
@@ -99,20 +99,20 @@ const fs::path &manager::user_directory() noexcept {
 	return user_root;
 }
 
-std::vector<u8> manager::load_from(const fs::path &path) {
+bytes manager::load_from(const fs::path &path) {
 	if (!fs::exists(path, err) || !fs::is_regular_file(path, err))
 		return {};
 
 	if (fs::bifstream file{ path, std::ios::binary | std::ios::ate }; file.is_open()) {
 		const auto size{ static_cast<u32>(file.tellg()) };
 		file.seekg(std::ios::beg);
-		std::vector<u8> content(size, u8{});
+		bytes content(size, u8{});
 		file.read(&content[0], size);
 		return content;
 	}
 	return {};
 }
-std::vector<u8> manager::load_from_http(const fs::path &path) {
+bytes manager::load_from_http(const fs::path &path) {
 	spdlog::error("[{}] load_from_http isn't implemented yet", class_name);
 	return {};
 }
