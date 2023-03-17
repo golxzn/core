@@ -8,6 +8,7 @@
 	#include <unordered_map>
 #endif
 
+#include <vector>
 #include <memory>
 #include <cstdint>
 #include <type_traits>
@@ -31,6 +32,8 @@ using f32 = double;
 using f64 = long double;
 using size = i64;
 using usize = u64;
+
+using bytes = std::vector<u8>;
 
 namespace types_literals {
 
