@@ -4,7 +4,7 @@ set(root ${CMAKE_CURRENT_SOURCE_DIR})
 include(${root}/cmake/prelude.cmake)
 
 project(golxzn_core
-	VERSION 0.3.2
+	VERSION 0.3.3
 	DESCRIPTION "[golxzn] basic stuff for the gxen game enging"
 	HOMEPAGE_URL https://github.com/golxzn/core
 	LANGUAGES CXX
