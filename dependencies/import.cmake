@@ -17,11 +17,13 @@ endif()
 set(SPDLOG_INSTALL ON)
 add_subdirectory(${GOLXZNC_DEPENDENCIES_DIR}/spdlog ${GOLXZNC_DEPENDENCIES_BUILD_DIR}/spdlog EXCLUDE_FROM_ALL)
 
-set(PLATFORMFOLDERS_ENABLE_INSTALL ON)
+set(PLATFORMFOLDERS_ENABLE_INSTALL ON CACHE BOOL "" FORCE)
 add_subdirectory(${GOLXZNC_DEPENDENCIES_DIR}/PlatformFolders ${GOLXZNC_DEPENDENCIES_BUILD_DIR}/PlatformFolders EXCLUDE_FROM_ALL)
 
 set(GHC_FILESYSTEM_WITH_INSTALL ON)
 add_subdirectory(${GOLXZNC_DEPENDENCIES_DIR}/filesystem EXCLUDE_FROM_ALL)
+
+find_package(Threads REQUIRED)
 
 add_dependencies(${target}_lib
 	spdlog::spdlog
@@ -29,6 +31,7 @@ add_dependencies(${target}_lib
 	ghcFilesystem::ghc_filesystem
 )
 list(APPEND libraries
+	Threads::Threads
 	spdlog::spdlog
 	sago::platform_folders
 	ghcFilesystem::ghc_filesystem

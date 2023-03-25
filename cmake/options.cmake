@@ -5,6 +5,8 @@ set(includes)
 set(libraries "")
 set(compile_options "")
 
+set(BUILD_SHARED_LIBS OFF)
+
 set(GOLXZNC_PACKAGE_NAME GolxznCore)
 set(GOLXZNC_INCLUDE_DIR ${root}/code/include)
 set(GOLXZNC_SOURCES_DIR ${root}/code/src)
@@ -15,10 +17,6 @@ set(GOLXZNC_CXX_STANDARD 17)
 set(GOLXZNC_ENABLE_EXCEPTIONS OFF CACHE BOOL "Use C++ exceptions")
 
 set(GOLXZNC_CPM_VERSION "0.36.0" CACHE STRING "CMake Package Manager")
-
-set(GOLXZNC_SPDLOG_VERSION           "1.11.0"         CACHE STRING "SPDLOG library version"        )
-set(GOLXZNC_PLATFORM_FOLDERS_VERSION "4.2.0"          CACHE STRING "PlatformFolders version"       )
-set(GOLXZNC_FILESYSTEM_VERSION       "1.5.12"         CACHE STRING "Gulrak Filesystem version"     )
 
 option(GOLXZNC_USE_BOOST "Use boost library" OFF)
 if(GOLXZNC_USE_BOOST)
@@ -58,9 +56,6 @@ message(STATUS "Libraries:                      |")
 if(GOLXZNC_USE_BOOST)
 	message(STATUS "    Boost:                      | ${GOLXZNC_BOOST_VERSION}")
 endif()
-message(STATUS "    SPD log version:            | ${GOLXZNC_SPDLOG_VERSION}")
-message(STATUS "    PlarformFolders version:    | ${GOLXZNC_PLATFORM_FOLDERS_VERSION}")
-message(STATUS "    Gulrack filesystem version: | ${GOLXZNC_FILESYSTEM_VERSION}")
 
 if(GOLXZNC_DEVELOPER_MODE)
 	message(STATUS "    Catch2:                     | ${GOLXZNC_CATCH2_VERSION}")

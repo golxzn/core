@@ -33,8 +33,10 @@ void manager::set_write_mode(const WriteMode mode) noexcept { write_mode = mode;
 void manager::reset_write_mode() noexcept { write_mode = WriteMode::Rewrite; }
 
 bytes manager::load_binary(const std::string_view path) {
-	if (path.empty())
+	if (path.empty()) {
+		spdlog::warn("[{}]: Cannot load binary from empty path.", class_name);
 		return {};
+	}
 
 	if (const auto url_pos{ path.find(url_separator) }; url_pos != path.npos) {
 		const auto url{ path.substr(0, url_pos + url_separator.size()) };
@@ -56,8 +58,11 @@ std::string manager::load_string(const std::string_view path) {
 }
 
 bool manager::save_binary(const std::string_view path, const bytes &data) {
-	if (path.empty() || data.empty())
+	if (path.empty() || data.empty()) {
+		spdlog::warn("[{}]: Cannot save binary: {}", class_name,
+			path.empty() ? "empty path" : "empty data");
 		return false;
+	}
 
 	if (const auto url_pos{ path.find(url_separator) }; url_pos != path.npos) {
 		const auto url{ path.substr(0, url_pos + url_separator.size()) };
@@ -72,8 +77,12 @@ bool manager::save_binary(const std::string_view path, const bytes &data) {
 	return false;
 }
 bool manager::save_string(const std::string_view path, const std::string_view data) {
-	if (path.empty() || data.empty())
+	if (path.empty() || data.empty()) {
+		spdlog::warn("[{}]: Cannot save string: {}", class_name,
+			path.empty() ? "empty path" : "empty data");
 		return false;
+	}
+
 
 	if (const auto url_pos{ path.find(url_separator) }; url_pos != path.npos) {
 		const auto url{ path.substr(0, url_pos + url_separator.size()) };
