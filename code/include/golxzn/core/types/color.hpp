@@ -26,7 +26,7 @@ struct color {
 		: r{ static_cast<u8>(red * max_alpha_f) }, g{ static_cast<u8>(green * max_alpha_f) }
 		, b{ static_cast<u8>(blue * max_alpha_f) }, a{ static_cast<u8>(alpha * max_alpha_f) } {}
 
-	constexpr color(const u32 color) noexcept
+	constexpr explicit color(const u32 color) noexcept
 		: r{ static_cast<u8>((color >> 16) & 0xFF) }
 		, g{ static_cast<u8>((color >> 8) & 0xFF) }
 		, b{ static_cast<u8>(color & 0xFF) }
