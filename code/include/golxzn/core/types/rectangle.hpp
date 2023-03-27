@@ -50,6 +50,15 @@ struct rect{
 		return top <= bottom && left <= right;
 	}
 
+	constexpr bool operator==(const rect &other) const noexcept {
+		return x == other.x && y == other.y && width == other.width && height == other.height;
+	}
+	constexpr bool operator!=(const rect &other) const noexcept { return !(*this == other); }
+	constexpr bool operator<(const rect &other) const noexcept { return area() < other.area(); }
+	constexpr bool operator>(const rect &other) const noexcept { return other.area() < area(); }
+	constexpr bool operator<=(const rect &other) const noexcept { return !(*this > other); }
+	constexpr bool operator>=(const rect &other) const noexcept { return !(*this < other); }
+
 	value_type x{};
 	value_type y{};
 	value_type width{};
