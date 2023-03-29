@@ -37,6 +37,9 @@ u32 image::width() const noexcept {
 u32 image::height() const noexcept {
 	return m_height;
 }
+u32 image::stride() const noexcept {
+	return m_width * color_count;
+}
 u32 image::bytes_count() const noexcept {
 	return m_width * m_height * color_count;
 }
@@ -91,24 +94,24 @@ void image::fill(const color fill_color) noexcept {
 	}
 }
 
-void image::flip(const std::bitset<2> &dir) noexcept {
-	if (m_data.empty() || dir.none()) {
+void image::flip(const flip_direction dir) noexcept {
+	if (m_data.empty()) {
 		return;
 	}
 
-	if (dir.all()) {
-		for (auto x{ 0u }; x < m_width / 2; ++x) {
-			for (auto y{ 0u }; y < m_height / 2; ++y) {
-				std::swap(pixel(x, y), pixel(m_width - x - 1, m_height - y - 1));
-			}
+	if (flip_direction::both == dir) {
+		auto colors{ colors_ptr() };
+		const auto length{ m_width * m_height };
+		for (auto i{ 0u }, j{ length - 1 }; i < length / 2; ++i, --j) {
+			std::swap(colors[i], colors[j]);
 		}
-	} else if (dir.test(flip_vertical)) {
+	} else if (flip_direction::vertical == dir) {
 		for (auto x{ 0u }; x < m_width; ++x) {
 			for (auto y{ 0u }; y < m_height / 2; ++y) {
 				std::swap(pixel(x, y), pixel(x, m_height - y - 1));
 			}
 		}
-	} else if (dir.test(flip_horizontal)) {
+	} else if (flip_direction::horizontal == dir) {
 		for (auto y{ 0u }; y < m_height; ++y) {
 			for (auto x{ 0u }; x < m_width / 2; ++x) {
 				std::swap(pixel(x, y), pixel(m_width - x - 1, y));
@@ -117,10 +120,88 @@ void image::flip(const std::bitset<2> &dir) noexcept {
 	}
 }
 
-// void image::copy(const point2<u32> &pos, const image &other, const rect<u32> &source_rect) {
+// void image::copy(const point2<u32> &pos, const image &other, const rect<u32> &source_rect, copy_policy policy) {
+// 	if (empty() || other.empty()) {
+// 		constexpr static auto b2str{ [](auto value) { return value ? "empty" : "not empty"; } };
+// 		spdlog::warn("[{}] Cannot copy empty images. (this: {}, other: {})",
+// 			class_name, b2str(empty()), b2str(other.empty()));
+// 		return;
+// 	}
+
 // 	if (pos.at(0) > m_width || pos.at(1) > m_height) {
 // 		utils::error::out_of_range("[golxzn::core::types::image] copy: out of range!");
 // 	}
+
+// 	const rect<u32> frame{ reduce_rect(pos, other, source_rect, policy) };
+
+
+
+// }
+
+// void image::crop(const rect<u32> &crop_rect) noexcept {
+// 	if (empty()) {
+// 		spdlog::warn("[{}] Cannot crop empty image", class_name);
+// 		return;
+// 	}
+
+// 	const auto[x, y, w, h]{ crop_rect };
+// 	if (w > m_width || h > m_height) {
+// 		spdlog::warn("[{}] The given crop_rect is out of range", class_name);
+// 		return;
+// 	}
+
+// 	if (x == 0 && y == 0 && w == m_width && h == m_height) return;
+// 	if (x == 0 && y == 0 && w == m_width) {
+// 		const auto previous_height{ m_height };
+// 		m_height = h;
+// 		m_data.resize(bytes_count());
+// 		return;
+// 	}
+
+// 	bytes data;
+// 	const auto new_bytes_length{ w * h * color_count };
+// 	data.resize(new_bytes_length);
+// 	const auto start{ y * m_width + x * color_count };
+// 	for (usize i{}; i < new_bytes_length; i += color_count) {
+// 		std::copy_n(&m_data[start + i], color_count, &data[i]);
+// 	}
+// 	m_data = std::move(data);
+// }
+
+// void image::expand(const rect<u32> &rect, const color fill_color) noexcept {
+
+// }
+
+// void image::resize(const u32 width, const u32 height, const color fill_color) {
+// 	if (width == m_width && height == m_height) return;
+// 	if (width == 0 || height == 0) {
+// 		clean();
+// 		return;
+// 	}
+
+// 	enum class method{ expand, crop, no_change };
+// 	static const auto select_method{ [](const u32 origin, const u32 new_value) {
+// 		if (origin == new_value) return method::no_change;
+// 		if (origin > new_value) return method::crop;
+// 		return method::expand;
+// 	} };
+
+// 	const auto width_method{ select_method(m_width, width) };
+// 	const auto height_method{ select_method(m_height, height) };
+
+// 	// if (width_method == method::expand && height_method == method::expand) {
+// 	// 	expand(width, height, fill_color);
+// 	// } else if (width_method == method::crop && height_method == method::crop) {
+// 	// 	crop(width, height);
+// 	// } else if (width_method == method::expand && height_method == method::crop) {
+// 	// 	expand(width, m_height, fill_color);
+// 	// 	crop(width, height);
+// 	// } else if (width_method == method::crop && height_method == method::expand) {
+// 	// 	crop(m_width, height);
+// 	// 	expand(m_width, height, fill_color);
+// 	// } else {
+// 	// 	spdlog::warn("[{}] Unknown method", class_name);
+// 	// }
 // }
 
 void image::clean() noexcept {
@@ -149,11 +230,24 @@ bool image::operator>=(const image &other) const noexcept {
 	return !(other < *this);
 }
 
+// rect<u32> image::reduce_rect(const point2<u32> &pos, const image &img,
+// 	const rect<u32> &source_rect, copy_policy policy) const noexcept {
+
+// 	rect<u32> frame{ source_rect };
+// 	if (frame.right() > img.m_width)   frame.width = img.m_width - frame.x;
+// 	if (frame.bottom() > img.m_height) frame.height = img.m_height - frame.y;
+
+// 	if (copy_policy::discard == policy) {
+// 		if (frame.right() > m_width)   frame.width = m_width - frame.x;
+// 		if (frame.bottom() > m_height) frame.height = m_height - frame.y;
+// 	}
+// 	return frame;
+// }
+
 const color *const image::colors_ptr() const noexcept {
 	return reinterpret_cast<const color *>(m_data.data());
 }
 color *image::colors_ptr() noexcept {
 	return reinterpret_cast<color *>(m_data.data());
 }
-
 } // namespace golxzn::core::types

@@ -8,7 +8,16 @@ project(stb_image
 
 option(STB_IMAGE_INSTALL "Install stb_image" OFF)
 
-add_library(stb_image STATIC src/stb_image.cpp include/stb_image.h)
+set(stb_image_sources
+	src/stb_image.cpp
+	src/stb_image_write.cpp
+)
+set(stb_image_headers
+	include/stb_image.h
+	include/stb_image_write.h
+)
+
+add_library(stb_image STATIC ${stb_image_sources} ${stb_image_headers})
 add_library(stb::image ALIAS stb_image)
 
 target_include_directories(stb_image SYSTEM PUBLIC

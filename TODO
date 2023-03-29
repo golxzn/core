@@ -9,7 +9,17 @@
 
 [ ] types
   [ ] Image
+    [ ] copy
+    [ ] crop
+    [ ] expand
+    [ ] resize
+  [ ] Gif
 
 [ ] glm
   [ ] Integrate color class with glm;
   [ ] Integrate angle class with glm;
+
+[ ] Platforms
+  [ ] MacOS
+  [ ] iOS
+  [ ] Android
