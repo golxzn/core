@@ -6,6 +6,7 @@
 
 namespace golxzn::core::resources {
 
+bool manager::initialized{ false };
 std::error_code manager::err{};
 manager::write_mode manager::writing_mode{ manager::write_mode::rewrite };
 fs::path manager::assets_root{ fs::current_path(err) };
@@ -30,10 +31,12 @@ const umap<std::string_view, manager::ExistHandler> manager::exist_handlers{
 };
 
 void manager::initialize(const std::string_view application_name, const std::string_view assets_directory_name) {
+	if (initialized) return;
 	spdlog::info("[{}] Initializing with {} and {}",
 		class_name, application_name, assets_directory_name);
 	setup_assets_root(assets_directory_name);
 	setup_user_root(application_name);
+	initialized = true;
 }
 
 void manager::set_write_mode(const write_mode mode) noexcept { writing_mode = mode; }
@@ -188,15 +191,15 @@ bool manager::save_image(const std::string_view path, const types::image::ref &i
 	switch(img_type) {
 		case image_type::png:
 			convert_status = stbi_write_png_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->data().data(), img->stride());
+				img->width(), img->height(), types::image::color_count, img->raw().data(), img->stride());
 			break;
 		case image_type::bmp:
 			convert_status = stbi_write_bmp_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->data().data());
+				img->width(), img->height(), types::image::color_count, img->raw().data());
 			break;
 		case image_type::tga:
 			convert_status = stbi_write_tga_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->data().data());
+				img->width(), img->height(), types::image::color_count, img->raw().data());
 			break;
 		/*
 		case image_type::hdr:
@@ -206,7 +209,7 @@ bool manager::save_image(const std::string_view path, const types::image::ref &i
 		*/
 		case image_type::jpg:
 			convert_status = stbi_write_jpg_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->data().data(), 90);
+				img->width(), img->height(), types::image::color_count, img->raw().data(), 90);
 			break;
 		default:
 			spdlog::error("[{}] Cannot save image: format is not supported", class_name);

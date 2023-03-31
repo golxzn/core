@@ -10,9 +10,9 @@
 [ ] types
   [ ] Image
     [ ] copy
-    [ ] crop
     [ ] expand
     [ ] resize
+    [*] crop
   [ ] Gif
 
 [ ] glm
@@ -23,3 +23,6 @@
   [ ] MacOS
   [ ] iOS
   [ ] Android
+
+[ ] Tests
+  [ ] Make individual target Benchmarks and move benchs from tests

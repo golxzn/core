@@ -8,7 +8,7 @@ namespace golxzn::core {
 
 struct color {
 	static constexpr u8 max_alpha{ static_cast<u8>(255) };
-	static constexpr f16 max_alpha_f{ static_cast<f16>(255.0f) };
+	static constexpr f16 max_alpha_f{ 255.0f };
 
 	constexpr color() noexcept = default;
 	constexpr color(const color &) noexcept = default;

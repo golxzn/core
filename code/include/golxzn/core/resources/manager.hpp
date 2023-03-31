@@ -58,6 +58,7 @@ public:
 	[[nodiscard]] static std::string extension_by_type(const image_type type) noexcept;
 
 private:
+	static bool initialized;
 	static write_mode writing_mode;
 	static fs::path assets_root;
 	static fs::path user_root;

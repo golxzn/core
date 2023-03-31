@@ -43,7 +43,7 @@ u32 image::stride() const noexcept {
 u32 image::bytes_count() const noexcept {
 	return m_width * m_height * color_count;
 }
-const bytes &image::data() const noexcept {
+const bytes &image::raw() const noexcept {
 	return m_data;
 }
 bool image::empty() const noexcept {
@@ -138,35 +138,54 @@ void image::flip(const flip_direction dir) noexcept {
 
 // }
 
-// void image::crop(const rect<u32> &crop_rect) noexcept {
-// 	if (empty()) {
-// 		spdlog::warn("[{}] Cannot crop empty image", class_name);
-// 		return;
-// 	}
+void image::crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept {
+	if (empty()) {
+		spdlog::warn("[{}] Cannot crop empty image", class_name);
+		return;
+	}
 
-// 	const auto[x, y, w, h]{ crop_rect };
-// 	if (w > m_width || h > m_height) {
-// 		spdlog::warn("[{}] The given crop_rect is out of range", class_name);
-// 		return;
-// 	}
+	if (x >= m_width || y >= m_height) {
+		spdlog::warn("[{}] Crop rect '[{}, {}, {}, {}]' is out of range",
+			class_name, x, y, width, height);
+		return;
+	}
 
-// 	if (x == 0 && y == 0 && w == m_width && h == m_height) return;
-// 	if (x == 0 && y == 0 && w == m_width) {
-// 		const auto previous_height{ m_height };
-// 		m_height = h;
-// 		m_data.resize(bytes_count());
-// 		return;
-// 	}
+	const auto w{ width  == 0 ? m_width - x  : std::min(width, m_width - x) };
+	const auto h{ height == 0 ? m_height - y : std::min(height, m_height - y) };
 
-// 	bytes data;
-// 	const auto new_bytes_length{ w * h * color_count };
-// 	data.resize(new_bytes_length);
-// 	const auto start{ y * m_width + x * color_count };
-// 	for (usize i{}; i < new_bytes_length; i += color_count) {
-// 		std::copy_n(&m_data[start + i], color_count, &data[i]);
-// 	}
-// 	m_data = std::move(data);
-// }
+	if (x == 0 && y == 0 && w == m_width) {
+		if (h == m_height) return; // Nothing to do.
+		m_height = h;
+		m_data.resize(bytes_count());
+		return;
+	}
+
+	const auto start_offset{ y * m_width * color_count };
+	const auto line_start_offset{ x * color_count };
+	const auto line_end_offset{ (m_width - (x + w)) * color_count };
+
+	const auto new_line_bytes_length{ w * color_count };
+	const auto new_bytes_length{ new_line_bytes_length * h };
+	bytes data(new_bytes_length);
+	auto extract_pos{ start_offset };
+
+	for (u32 column{}; column < h; ++column) {
+		const auto column_offset{ column * new_line_bytes_length };
+		extract_pos += line_start_offset;
+		for (u32 row{}; row < new_line_bytes_length; row += color_count, extract_pos += color_count) {
+			std::copy_n(&m_data[extract_pos], color_count, &data[column_offset + row]);
+		}
+		extract_pos += line_end_offset;
+	}
+
+	m_data = std::move(data);
+	m_width = w;
+	m_height = h;
+}
+
+void image::crop(const rect<u32> &crop_rect) noexcept {
+	crop(crop_rect.x, crop_rect.y, crop_rect.width, crop_rect.height);
+}
 
 // void image::expand(const rect<u32> &rect, const color fill_color) noexcept {
 

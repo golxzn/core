@@ -36,7 +36,7 @@ public:
 	[[nodiscard]] u32 height() const noexcept;
 	[[nodiscard]] u32 stride() const noexcept;
 	[[nodiscard]] u32 bytes_count() const noexcept;
-	[[nodiscard]] const bytes &data() const noexcept;
+	[[nodiscard]] const bytes &raw() const noexcept;
 	[[nodiscard]] bool empty() const noexcept;
 
 	[[nodiscard]] color &pixel(const u32 x, const u32 y);
@@ -47,7 +47,8 @@ public:
 	// void copy(const point2<u32> &pos, const image &other,
 	// 	const rect<u32> &source_rect = {}, copy_policy policy = copy_policy::discard);
 
-	// void crop(const rect<u32> &rect) noexcept;
+	void crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept;
+	void crop(const rect<u32> &rect) noexcept;
 	// void expand(const rect<u32> &rect, const color fill_color = default_fill_color) noexcept;
 	// void resize(const u32 width, const u32 height, const color fill_color = default_fill_color) noexcept;
 	void replace(const color from, const color to) noexcept;
