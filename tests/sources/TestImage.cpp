@@ -24,9 +24,9 @@ TEST_CASE("Image", "[golxzn][core][tests]") {
 			png->crop(rect);
 			REQUIRE(png->width() == expected_width);
 			REQUIRE(png->height() == expected_height);
-			const std::string path{
-				"user://images/cropped/" + std::to_string(expected_width) +
-				"x" + std::to_string(expected_height) + ".png"
+			const std::string path{"user://images/cropped/" +
+				std::to_string(expected_width) + "x" +
+				std::to_string(expected_height) + ".png"
 			};
 			core::res_man::save_image(path, png);
 		};
@@ -36,6 +36,35 @@ TEST_CASE("Image", "[golxzn][core][tests]") {
 		crop_test(core::rect<core::u32>{ 0, 50, 250, 250 }); // [250, 250] -> [250, 200]
 		crop_test(core::rect<core::u32>{ 50, 0, 250, 200 }); // [250, 200] -> [200, 200]
 		crop_test(core::rect<core::u32>{ 50, 50, 100, 100 }); // [200, 200] -> [100, 100]
+	}
+
+	SECTION("expand") {
+		using namespace golxzn::core::color_literals;
+		using namespace golxzn::core;
+
+		auto png{ res_man::load_image("res://images/test.png") };
+
+		const auto expand_test = [&] (auto clr, u32 x, u32 y, u32 w, u32 h) {
+			const auto expected_width{ x + w + png->width() };
+			const auto expected_height{ y + h + png->height() };
+			png->expand(rect<u32>{ x, y, w, h }, clr);
+			REQUIRE(png->width() == expected_width);
+			REQUIRE(png->height() == expected_height);
+			const std::string path{ "user://images/expanded/" +
+				std::to_string(png->width()) + "x" +
+				std::to_string(png->height()) + ".png"
+			};
+			res_man::save_image(path, png);
+		};
+
+		//             Color          left   up right down
+		expand_test("red"_clr,           0, 100,   0,   0);  // [300, 300] -> [300, 400]
+		expand_test("green"_clr,         0,   0,   0, 100);  // [300, 400] -> [300, 500]
+		expand_test("silver"_clr,      100,   0,   0,   0);  // [300, 500] -> [400, 500]
+		expand_test("dark_red"_clr,      0,   0, 100,   0);  // [400, 500] -> [500, 500]
+		expand_test("blue"_clr,          0, 100, 100,   0);  // [500, 500] -> [600, 600]
+		expand_test("gold"_clr,        100,   0,   0, 100);  // [600, 600] -> [700, 700]
+		expand_test("white"_clr,       100, 100, 100, 100);  // [700, 700] -> [900, 900]
 	}
 }
 

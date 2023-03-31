@@ -1,4 +1,5 @@
 #include <spdlog/spdlog.h>
+#include <golxzn/core/utils/traits.hpp>
 
 #include "golxzn/core/types/image.hpp"
 
@@ -153,7 +154,7 @@ void image::crop(const u32 x, const u32 y, const u32 width, const u32 height) no
 	const auto w{ width  == 0 ? m_width - x  : std::min(width, m_width - x) };
 	const auto h{ height == 0 ? m_height - y : std::min(height, m_height - y) };
 
-	if (x == 0 && y == 0 && w == m_width) {
+	if (traits::all_from(0, x, y) && w == m_width) {
 		if (h == m_height) return; // Nothing to do.
 		m_height = h;
 		m_data.resize(bytes_count());
@@ -187,9 +188,48 @@ void image::crop(const rect<u32> &crop_rect) noexcept {
 	crop(crop_rect.x, crop_rect.y, crop_rect.width, crop_rect.height);
 }
 
-// void image::expand(const rect<u32> &rect, const color fill_color) noexcept {
+void image::expand(const u32 left, const u32 up, const u32 right, const u32 down, const color fill_color) noexcept {
+	if (traits::all_from(0, left, up, right, down)) return;
 
-// }
+	if (empty()) {
+		m_width = left + right;
+		m_height = up + down;
+		fill(fill_color);
+		return;
+	}
+
+	if (traits::all_from(0, left, up, right)) {
+		const auto new_height{ m_height + down };
+		m_data.resize(m_width * new_height * color_count);
+		std::fill_n(colors_ptr() + m_width * m_height, down * m_width, fill_color);
+		m_height = new_height;
+		return;
+	}
+
+	const auto new_width{ left + m_width + right };
+	const auto new_height{ up + m_height + down };
+
+	bytes data;
+	data.resize(new_width * new_height * color_count);
+	auto color_ptr{ reinterpret_cast<color *>(data.data()) };
+
+	color_ptr = std::fill_n(color_ptr, new_width * up, fill_color);
+	for (u32 row{}; row < m_height; ++row) {
+		color_ptr = std::fill_n(color_ptr, left, fill_color);
+		color_ptr = std::copy_n(colors_ptr() + row * m_width, m_width, color_ptr);
+		color_ptr = std::fill_n(color_ptr, right, fill_color);
+	}
+	std::fill_n(color_ptr, new_width * down, fill_color);
+
+	m_data = std::move(data);
+	m_width = new_width;
+	m_height = new_height;
+
+}
+
+void image::expand(const rect<u32> &expand_rect, const color fill_color) noexcept {
+	return expand(expand_rect.x, expand_rect.y, expand_rect.width, expand_rect.height, fill_color);
+}
 
 // void image::resize(const u32 width, const u32 height, const color fill_color) {
 // 	if (width == m_width && height == m_height) return;

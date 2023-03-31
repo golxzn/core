@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include "golxzn/core/utils/traits.hpp"
 #include "golxzn/core/types.hpp"
 #include "golxzn/core/math/point.hpp"
 
@@ -18,6 +19,8 @@ struct rect{
 	constexpr rect &operator=(rect &&) noexcept = default;
 	constexpr rect(const value_type x, const value_type y, const value_type w, const value_type h) noexcept
 		: x{ x }, y{ y }, width{ w }, height{ h } {}
+
+	constexpr bool empty() const noexcept{ return traits::all_from(T{}, x, y, width, height); };
 
 	constexpr value_type left() const noexcept { return x; }
 	constexpr value_type top() const noexcept { return y; }

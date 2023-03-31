@@ -46,6 +46,11 @@ struct color {
 	union { u8 green{ max_alpha }; u8 g; };
 	union { u8 blue{ max_alpha };  u8 b; };
 	union { u8 alpha{ max_alpha }; u8 a; };
+
+	u8 *begin() noexcept;
+	u8 *end() noexcept;
+	const u8 *const begin() const noexcept;
+	const u8 *const end() const noexcept;
 };
 
 bool validate_hex_color(const std::string_view str);

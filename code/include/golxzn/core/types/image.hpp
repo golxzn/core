@@ -49,7 +49,8 @@ public:
 
 	void crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept;
 	void crop(const rect<u32> &rect) noexcept;
-	// void expand(const rect<u32> &rect, const color fill_color = default_fill_color) noexcept;
+	void expand(const u32 left, const u32 up, const u32 right, const u32 down, const color fill_color = default_fill_color) noexcept;
+	void expand(const rect<u32> &rect, const color fill_color = default_fill_color) noexcept;
 	// void resize(const u32 width, const u32 height, const color fill_color = default_fill_color) noexcept;
 	void replace(const color from, const color to) noexcept;
 	void mask(const color mask_color) noexcept;
