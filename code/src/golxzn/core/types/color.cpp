@@ -14,9 +14,9 @@ const u8 *const color::raw() const noexcept {
 }
 
 u8 *color::begin() noexcept { return raw(); }
-u8 *color::end() noexcept { return raw() + 4; }
+u8 *color::end() noexcept { return raw() + sizeof(color); }
 const u8 *const color::begin() const noexcept { return raw(); }
-const u8 *const color::end() const noexcept { return raw() + 4; }
+const u8 *const color::end() const noexcept { return raw() + sizeof(color); }
 
 
 bool validate_hex_color(const std::string_view str) {
