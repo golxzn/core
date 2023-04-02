@@ -121,22 +121,65 @@ void image::flip(const flip_direction dir) noexcept {
 	}
 }
 
-// void image::copy(const point2<u32> &pos, const image &other, const rect<u32> &source_rect, copy_policy policy) {
-// 	if (empty() || other.empty()) {
-// 		constexpr static auto b2str{ [](auto value) { return value ? "empty" : "not empty"; } };
-// 		spdlog::warn("[{}] Cannot copy empty images. (this: {}, other: {})",
-// 			class_name, b2str(empty()), b2str(other.empty()));
+// void image::copy(const point2<i32> &pos, const ref &source, const rect<u32> &source_rect, overlap_policy policy) {
+// 	if (source != nullptr) {
+// 		copy(pos, *source, source_rect, policy);
+// 	}
+// }
+
+// void image::copy(const point2<i32> &pos, const image &source, const rect<u32> &source_rect, overlap_policy policy) {
+// 	if (empty() || source.empty()) {
+// 		const static auto b2str{ [](auto value) { return value ? "empty" : "not empty"; } };
+// 		spdlog::warn("[{}] Cannot copy empty images. (this: {}, source: {})",
+// 			class_name, b2str(empty()), b2str(source.empty()));
 // 		return;
 // 	}
 
-// 	if (pos.at(0) > m_width || pos.at(1) > m_height) {
-// 		utils::error::out_of_range("[golxzn::core::types::image] copy: out of range!");
+// 	auto position{ pos };
+// 	rect<u32> src_frame{ reduce_rect(position, source, source_rect, policy) };
+// 	rect<u32> dest_frame{ 0, 0, m_width, m_height };
+
+// 	auto result_frame{ dest_frame.overlap(rect<u32>{
+// 		static_cast<u32>(position.at(0) > 0 ? position.at(0) : 0),
+// 		static_cast<u32>(position.at(1) > 0 ? position.at(0) : 0),
+// 		src_frame.width, src_frame.height
+// 	}) };
+// 	if (result_frame == src_frame) {
+// 		m_data = source.m_data;
+// 		m_width = source.m_width;
+// 		m_height = source.m_height;
+// 		return;
 // 	}
 
-// 	const rect<u32> frame{ reduce_rect(pos, other, source_rect, policy) };
+// 	if (policy == overlap_policy::expand_target && (pos.at(0) < 0 || pos.at(1) < 0  || dest_frame < result_frame)) {
+// 		const auto left_padding{ pos.at(0) < 0 ? std::abs(pos.at(0)) : 0 };
+// 		const auto top_padding{ pos.at(1) < 0 ? std::abs(pos.at(1)) : 0 };
+// 		const auto right_padding{ result_frame.width - dest_frame.width };
+// 		const auto bottom_padding{ result_frame.height - dest_frame.height };
+// 		expand(left_padding, top_padding, right_padding, bottom_padding);
+// 		dest_frame = rect<u32>{ 0, 0, m_width, m_height };
+// 		position = {};
+// 		src_frame = reduce_rect(position, source, source_rect, overlap_policy::discard_source);
+// 		result_frame = dest_frame.overlap(src_frame);
+// 	}
 
+// 	if (dest_frame == result_frame) {
+// 		const auto source_line_start_offset{ src_frame.left() };
+// 		const auto source_line_end_offset{ source.width() - src_frame.right() };
 
+// 		auto target_ptr{ colors_ptr() };
+// 		auto source_ptr{ source.colors_ptr() + src_frame.top() * source.width() };
 
+// 		target_ptr += position.at(1) * m_width;
+// 		for (u32 row{}; row < src_frame.height; ++row) {
+// 			target_ptr += position.at(0);
+// 			source_ptr += source_line_start_offset;
+// 			target_ptr = std::copy_n(source_ptr, src_frame.width, target_ptr);
+// 			source_ptr += source_line_end_offset + src_frame.width;
+// 			target_ptr += m_width - (position.at(0) + src_frame.width);
+// 		}
+// 		return;
+// 	}
 // }
 
 void image::crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept {
@@ -161,22 +204,17 @@ void image::crop(const u32 x, const u32 y, const u32 width, const u32 height) no
 		return;
 	}
 
-	const auto start_offset{ y * m_width * color_count };
-	const auto line_start_offset{ x * color_count };
-	const auto line_end_offset{ (m_width - (x + w)) * color_count };
+	const auto line_start_offset{ x };
+	const auto line_end_offset{ (m_width - (x + w)) };
 
-	const auto new_line_bytes_length{ w * color_count };
-	const auto new_bytes_length{ new_line_bytes_length * h };
-	bytes data(new_bytes_length);
-	auto extract_pos{ start_offset };
+	bytes data(w * h * color_count);
+	auto color_ptr{ colors_ptr(data) };
+	auto colors{ colors_ptr() + y * m_width };
 
-	for (u32 column{}; column < h; ++column) {
-		const auto column_offset{ column * new_line_bytes_length };
-		extract_pos += line_start_offset;
-		for (u32 row{}; row < new_line_bytes_length; row += color_count, extract_pos += color_count) {
-			std::copy_n(&m_data[extract_pos], color_count, &data[column_offset + row]);
-		}
-		extract_pos += line_end_offset;
+	for (u32 row{}; row < h; ++row) {
+		colors += line_start_offset;
+		color_ptr = std::copy_n(colors, w, color_ptr);
+		colors += w + line_end_offset;
 	}
 
 	m_data = std::move(data);
@@ -209,9 +247,8 @@ void image::expand(const u32 left, const u32 up, const u32 right, const u32 down
 	const auto new_width{ left + m_width + right };
 	const auto new_height{ up + m_height + down };
 
-	bytes data;
-	data.resize(new_width * new_height * color_count);
-	auto color_ptr{ reinterpret_cast<color *>(data.data()) };
+	bytes data(new_width * new_height * color_count);
+	auto color_ptr{ colors_ptr(data) };
 
 	color_ptr = std::fill_n(color_ptr, new_width * up, fill_color);
 	for (u32 row{}; row < m_height; ++row) {
@@ -289,24 +326,47 @@ bool image::operator>=(const image &other) const noexcept {
 	return !(other < *this);
 }
 
-// rect<u32> image::reduce_rect(const point2<u32> &pos, const image &img,
-// 	const rect<u32> &source_rect, copy_policy policy) const noexcept {
+// rect<u32> image::reduce_rect(point2<i32> &pos, const image &source,
+// 	const rect<u32> &source_rect, overlap_policy policy) const noexcept {
 
-// 	rect<u32> frame{ source_rect };
-// 	if (frame.right() > img.m_width)   frame.width = img.m_width - frame.x;
-// 	if (frame.bottom() > img.m_height) frame.height = img.m_height - frame.y;
+// 	rect<u32> frame{
+// 		source_rect.empty()
+// 			? rect<u32>{ 0, 0, source.m_width, source.m_height }
+// 			: source_rect
+// 	};
+// 	if (frame.right() > source.m_width)   frame.width = source.m_width - frame.x;
+// 	if (frame.bottom() > source.m_height) frame.height = source.m_height - frame.y;
 
-// 	if (copy_policy::discard == policy) {
-// 		if (frame.right() > m_width)   frame.width = m_width - frame.x;
-// 		if (frame.bottom() > m_height) frame.height = m_height - frame.y;
+// 	if (overlap_policy::discard_source == policy) {
+// 		if (const auto abs_x{ std::abs(pos.at(0)) }; pos.at(0) < 0) {
+// 			pos.at(0) = 0;
+// 			frame.x += abs_x;
+// 			frame.width -= abs_x;
+// 		}
+// 		if (const auto abs_y{ std::abs(pos.at(1)) }; pos.at(1) < 0) {
+// 			pos.at(1) = 0;
+// 			frame.y += abs_y;
+// 			frame.height -= abs_y;
+// 		}
+
+// 		if (const auto delta{ m_width - pos.at(0) }; frame.width > delta)   frame.width = delta;
+// 		if (const auto delta{ m_height - pos.at(1) }; frame.height > delta) frame.height = delta;
 // 	}
 // 	return frame;
 // }
 
+const color *const image::colors_ptr(const bytes &data) noexcept {
+	return reinterpret_cast<const color *>(data.data());
+}
+color *image::colors_ptr(bytes &data) noexcept {
+	return reinterpret_cast<color *>(data.data());
+}
+
 const color *const image::colors_ptr() const noexcept {
-	return reinterpret_cast<const color *>(m_data.data());
+	return colors_ptr(m_data);
 }
 color *image::colors_ptr() noexcept {
-	return reinterpret_cast<color *>(m_data.data());
+	return colors_ptr(m_data);
 }
+
 } // namespace golxzn::core::types

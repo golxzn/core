@@ -10,8 +10,7 @@
 [ ] types
   [ ] Image
     [ ] copy
-    [ ] expand
-    [ ] resize
+    [*] expand
     [*] crop
   [ ] Gif
 

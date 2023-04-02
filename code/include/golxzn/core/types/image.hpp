@@ -42,10 +42,12 @@ public:
 	[[nodiscard]] color &pixel(const u32 x, const u32 y);
 	[[nodiscard]] color pixel(const u32 x, const u32 y) const noexcept;
 
-	// enum class copy_policy{ discard, resize };
+	// enum class overlap_policy{ discard_source, expand_target };
 
-	// void copy(const point2<u32> &pos, const image &other,
-	// 	const rect<u32> &source_rect = {}, copy_policy policy = copy_policy::discard);
+	// void copy(const point2<i32> &pos, const ref &source, const rect<u32> &source_rect = {},
+	// 	overlap_policy policy = overlap_policy::discard_source);
+	// void copy(const point2<i32> &pos, const image &source, const rect<u32> &source_rect = {},
+	// 	overlap_policy policy = overlap_policy::discard_source);
 
 	void crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept;
 	void crop(const rect<u32> &rect) noexcept;
@@ -70,8 +72,11 @@ private:
 	u32 m_height{};
 	bytes m_data{};
 
-	// rect<u32> reduce_rect(const point2<u32> &pos, const image &other, const rect<u32> &source_rect,
-	// 	copy_policy policy) const noexcept;
+	// rect<u32> reduce_rect(point2<i32> &pos, const image &other, const rect<u32> &source_rect,
+	// 	overlap_policy policy) const noexcept;
+
+	static const color *const colors_ptr(const bytes &data) noexcept;
+	static color *colors_ptr(bytes &data) noexcept;
 
 	const color *const colors_ptr() const noexcept;
 	color *colors_ptr() noexcept;

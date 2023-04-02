@@ -29,7 +29,7 @@ public:
 
 	constexpr explicit point(values_container &&values) noexcept : mValues{ std::move(values) } {}
 
-	template<class ...Args, std::enable_if_t<traits::are_same_v<T, Args...>, bool> = false>
+	template<class ...Args, std::enable_if_t<traits::are_convertible_v<T, Args...>, bool> = false>
 	constexpr explicit point(Args ...args) noexcept : mValues{ std::forward<Args>(args)... } { }
 
 	[[nodiscard]] constexpr value_type operator[](const usize index) const {
