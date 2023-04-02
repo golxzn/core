@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include "golxzn/core/utils/traits.hpp"
 #include "golxzn/core/types.hpp"
 #include "golxzn/core/math/point.hpp"
 
@@ -18,6 +19,8 @@ struct rect{
 	constexpr rect &operator=(rect &&) noexcept = default;
 	constexpr rect(const value_type x, const value_type y, const value_type w, const value_type h) noexcept
 		: x{ x }, y{ y }, width{ w }, height{ h } {}
+
+	constexpr bool empty() const noexcept{ return traits::all_from(T{}, x, y, width, height); };
 
 	constexpr value_type left() const noexcept { return x; }
 	constexpr value_type top() const noexcept { return y; }
@@ -48,6 +51,31 @@ struct rect{
 		const auto top{ std::max(this->top(), other.top()) };
 		const auto bottom{ std::min(this->bottom(), other.bottom()) };
 		return top <= bottom && left <= right;
+	}
+
+	constexpr rect overlap(const rect &other) const noexcept {
+		const auto left{ std::min(this->left(), other.left()) };
+		const auto top{ std::min(this->top(), other.top()) };
+		const auto right{ std::max(this->right(), other.right()) };
+		const auto bottom{ std::max(this->bottom(), other.bottom()) };
+		return rect<T>{ left, top, right - left, bottom - top };
+	}
+
+	constexpr bool operator==(const rect &other) const noexcept {
+		return x == other.x && y == other.y && width == other.width && height == other.height;
+	}
+	constexpr bool operator!=(const rect &other) const noexcept { return !(*this == other); }
+	constexpr bool operator<(const rect &other) const noexcept { return area() < other.area(); }
+	constexpr bool operator>(const rect &other) const noexcept { return other.area() < area(); }
+	constexpr bool operator<=(const rect &other) const noexcept { return !(*this > other); }
+	constexpr bool operator>=(const rect &other) const noexcept { return !(*this < other); }
+
+	template<class U>
+	explicit constexpr operator rect<U>() const noexcept {
+		return rect<U>{
+			static_cast<U>(x), static_cast<U>(y),
+			static_cast<U>(width), static_cast<U>(height)
+		};
 	}
 
 	value_type x{};

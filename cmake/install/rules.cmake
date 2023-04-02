@@ -21,8 +21,8 @@ install(TARGETS ${target}_lib
 	EXPORT ${package}Targets
 	RUNTIME COMPONENT ${package}_Runtime
 	LIBRARY COMPONENT ${package}_Runtime
-	NAMELINK_COMPONENT ${package}_Development
 	ARCHIVE COMPONENT ${package}_Development
+	# NAMELINK_COMPONENT ${package}_Development
 	PUBLIC_HEADER DESTINATION include COMPONENT ${package}_Development
 	INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )

@@ -4,6 +4,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 
+find_package(Threads REQUIRED)
+
 if(GOLXZNC_USE_BOOST)
 	CPMAddPackage(NAME Boost
 		VERSION ${GOLXZNC_BOOST_VERSION}
@@ -14,25 +16,31 @@ if(GOLXZNC_USE_BOOST)
 	list(APPEND includes ${Boost_INCLUDE_DIR})
 endif()
 
-set(SPDLOG_INSTALL ON)
-add_subdirectory(${GOLXZNC_DEPENDENCIES_DIR}/spdlog ${GOLXZNC_DEPENDENCIES_BUILD_DIR}/spdlog EXCLUDE_FROM_ALL)
+set(subdirs
+	spdlog
+	PlatformFolders
+	filesystem
+	stb_image
+)
 
+set(SPDLOG_INSTALL ON CACHE BOOL "" FORCE)
 set(PLATFORMFOLDERS_ENABLE_INSTALL ON CACHE BOOL "" FORCE)
-add_subdirectory(${GOLXZNC_DEPENDENCIES_DIR}/PlatformFolders ${GOLXZNC_DEPENDENCIES_BUILD_DIR}/PlatformFolders EXCLUDE_FROM_ALL)
-
-set(GHC_FILESYSTEM_WITH_INSTALL ON)
-add_subdirectory(${GOLXZNC_DEPENDENCIES_DIR}/filesystem EXCLUDE_FROM_ALL)
-
-find_package(Threads REQUIRED)
+set(GHC_FILESYSTEM_WITH_INSTALL ON CACHE BOOL "" FORCE)
+set(STB_IMAGE_INSTALL ON CACHE BOOL "" FORCE)
+foreach(subdir IN LISTS subdirs)
+	add_subdirectory(${GOLXZNC_DEPENDENCIES_DIR}/${subdir} ${GOLXZNC_DEPENDENCIES_BUILD_DIR}/${subdir} EXCLUDE_FROM_ALL)
+endforeach()
 
 add_dependencies(${target}_lib
 	spdlog::spdlog
 	sago::platform_folders
 	ghcFilesystem::ghc_filesystem
+	stb::image
 )
 list(APPEND libraries
 	Threads::Threads
 	spdlog::spdlog
 	sago::platform_folders
 	ghcFilesystem::ghc_filesystem
+	stb::image
 )

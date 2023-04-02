@@ -8,7 +8,7 @@ namespace golxzn::core {
 
 struct color {
 	static constexpr u8 max_alpha{ static_cast<u8>(255) };
-	static constexpr f16 max_alpha_f{ static_cast<f16>(255.0f) };
+	static constexpr f16 max_alpha_f{ 255.0f };
 
 	constexpr color() noexcept = default;
 	constexpr color(const color &) noexcept = default;
@@ -46,6 +46,11 @@ struct color {
 	union { u8 green{ max_alpha }; u8 g; };
 	union { u8 blue{ max_alpha };  u8 b; };
 	union { u8 alpha{ max_alpha }; u8 a; };
+
+	u8 *begin() noexcept;
+	u8 *end() noexcept;
+	const u8 *const begin() const noexcept;
+	const u8 *const end() const noexcept;
 };
 
 bool validate_hex_color(const std::string_view str);

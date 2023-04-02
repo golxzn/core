@@ -13,6 +13,12 @@ const u8 *const color::raw() const noexcept {
 	return reinterpret_cast<const u8 *const >(this);
 }
 
+u8 *color::begin() noexcept { return raw(); }
+u8 *color::end() noexcept { return raw() + sizeof(color); }
+const u8 *const color::begin() const noexcept { return raw(); }
+const u8 *const color::end() const noexcept { return raw() + sizeof(color); }
+
+
 bool validate_hex_color(const std::string_view str) {
 	if (str.empty() || str.at(0) != '#') return false;
 

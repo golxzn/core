@@ -12,10 +12,16 @@ namespace golxzn::core::types {
 class image {
 	static constexpr std::string_view class_name{ "golxzn::core::types::image" };
 public:
+	using ref = sptr<image>;
+
 	static constexpr color default_fill_color{ 0xFFFFFFFF };
 	static constexpr u32 color_count{ 4 };
-	static constexpr u8 flip_vertical{ (1 << 0) };
-	static constexpr u8 flip_horizontal{ (1 << 1) };
+
+	enum class flip_direction : u8 {
+		both,
+		horizontal,
+		vertical
+	};
 
 	GOLXZN_DEFAULT_CLASS(image);
 
@@ -28,18 +34,30 @@ public:
 
 	[[nodiscard]] u32 width() const noexcept;
 	[[nodiscard]] u32 height() const noexcept;
+	[[nodiscard]] u32 stride() const noexcept;
 	[[nodiscard]] u32 bytes_count() const noexcept;
-	[[nodiscard]] const bytes &data() const noexcept;
+	[[nodiscard]] const bytes &raw() const noexcept;
 	[[nodiscard]] bool empty() const noexcept;
 
 	[[nodiscard]] color &pixel(const u32 x, const u32 y);
 	[[nodiscard]] color pixel(const u32 x, const u32 y) const noexcept;
 
+	// enum class overlap_policy{ discard_source, expand_target };
+
+	// void copy(const point2<i32> &pos, const ref &source, const rect<u32> &source_rect = {},
+	// 	overlap_policy policy = overlap_policy::discard_source);
+	// void copy(const point2<i32> &pos, const image &source, const rect<u32> &source_rect = {},
+	// 	overlap_policy policy = overlap_policy::discard_source);
+
+	void crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept;
+	void crop(const rect<u32> &rect) noexcept;
+	void expand(const u32 left, const u32 up, const u32 right, const u32 down, const color fill_color = default_fill_color) noexcept;
+	void expand(const rect<u32> &rect, const color fill_color = default_fill_color) noexcept;
+	// void resize(const u32 width, const u32 height, const color fill_color = default_fill_color) noexcept;
 	void replace(const color from, const color to) noexcept;
 	void mask(const color mask_color) noexcept;
 	void fill(const color fill_color = default_fill_color) noexcept;
-	void flip(const std::bitset<2> &direction = flip_vertical | flip_horizontal) noexcept;
-	// void copy(const point2<u32> &pos, const image &other, const rect<u32> &source_rect = {});
+	void flip(const flip_direction direction) noexcept;
 	void clean() noexcept;
 
 	[[nodiscard]] bool operator==(const image &other) const noexcept;
@@ -53,6 +71,12 @@ private:
 	u32 m_width{};
 	u32 m_height{};
 	bytes m_data{};
+
+	// rect<u32> reduce_rect(point2<i32> &pos, const image &other, const rect<u32> &source_rect,
+	// 	overlap_policy policy) const noexcept;
+
+	static const color *const colors_ptr(const bytes &data) noexcept;
+	static color *colors_ptr(bytes &data) noexcept;
 
 	const color *const colors_ptr() const noexcept;
 	color *colors_ptr() noexcept;

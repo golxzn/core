@@ -9,7 +9,19 @@
 
 [ ] types
   [ ] Image
+    [ ] copy
+    [*] expand
+    [*] crop
+  [ ] Gif
 
 [ ] glm
   [ ] Integrate color class with glm;
   [ ] Integrate angle class with glm;
+
+[ ] Platforms
+  [ ] MacOS
+  [ ] iOS
+  [ ] Android
+
+[ ] Tests
+  [ ] Make individual target Benchmarks and move benchs from tests
