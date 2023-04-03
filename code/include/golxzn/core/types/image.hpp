@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <bitset>
+#include "golxzn/core/export.hpp"
 #include "golxzn/core/utils/error.hpp"
 #include "golxzn/core/types.hpp"
 #include "golxzn/core/types/color.hpp"
@@ -9,7 +10,7 @@
 
 namespace golxzn::core::types {
 
-class image {
+class GOLXZN_EXPORT image {
 	static constexpr std::string_view class_name{ "golxzn::core::types::image" };
 public:
 	using ref = sptr<image>;

@@ -1,11 +1,15 @@
 #pragma once
 
 #include <random>
-#include <core/aliases.hpp>
+#include "golxzn/core/export.hpp"
+#include "golxzn/core/types.hpp"
 
 namespace golxzn::core::utils {
 
-struct random final {
+struct GOLXZN_EXPORT random final {
+
+	GOLXZN_STATIC_CLASS(random);
+
 	template<class T>
 	using default_distr_v = std::conditional_t<
 		std::is_floating_point_v<T>,

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <string_view>
-#include <golxzn/core/utils/traits.hpp>
-#include <golxzn/core/types.hpp>
+#include "golxzn/core/export.hpp"
+#include "golxzn/core/utils/traits.hpp"
+#include "golxzn/core/types.hpp"
 
 namespace golxzn::core {
 
-struct color {
+struct GOLXZN_EXPORT color {
 	static constexpr u8 max_alpha{ static_cast<u8>(255) };
 	static constexpr f16 max_alpha_f{ 255.0f };
 

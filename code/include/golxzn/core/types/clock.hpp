@@ -1,13 +1,14 @@
 #pragma once
 
 #include <chrono>
+#include "golxzn/core/export.hpp"
 #include "golxzn/core/types.hpp"
 
 namespace golxzn::core {
 
 class time;
 
-class clock {
+class GOLXZN_EXPORT clock {
 public:
 	using clock_type = std::chrono::steady_clock;
 

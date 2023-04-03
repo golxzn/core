@@ -4,12 +4,13 @@
 #include <string>
 #include <string_view>
 
+#include "golxzn/core/export.hpp"
 #include "golxzn/core/types.hpp"
 #include "golxzn/core/types/image.hpp"
 
 namespace golxzn::core::resources {
 
-class manager {
+class GOLXZN_EXPORT manager {
 	static constexpr std::string_view class_name{ "resources::manager" };
 	static constexpr std::string_view url_separator{ "//" };
 

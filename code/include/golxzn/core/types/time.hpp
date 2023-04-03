@@ -1,11 +1,12 @@
 #pragma once
 
 #include <chrono>
+#include "golxzn/core/export.hpp"
 #include "golxzn/core/types.hpp"
 
 namespace golxzn::core {
 
-class time {
+class GOLXZN_EXPORT time {
 public:
 	constexpr time() noexcept = default;
 
