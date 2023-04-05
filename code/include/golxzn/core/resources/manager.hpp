@@ -5,7 +5,7 @@
 #include <string_view>
 
 #include "golxzn/core/export.hpp"
-#include "golxzn/core/types.hpp"
+#include "golxzn/core/aliases.hpp"
 #include "golxzn/core/types/image.hpp"
 
 namespace golxzn::core::resources {

@@ -4,7 +4,7 @@
 #include <bitset>
 #include "golxzn/core/export.hpp"
 #include "golxzn/core/utils/error.hpp"
-#include "golxzn/core/types.hpp"
+#include "golxzn/core/aliases.hpp"
 #include "golxzn/core/types/color.hpp"
 #include "golxzn/core/types/rectangle.hpp"
 

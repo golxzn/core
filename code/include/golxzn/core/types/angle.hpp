@@ -1,7 +1,7 @@
 #pragma once
 
 #include <variant>
-#include <golxzn/core/types.hpp>
+#include <golxzn/core/aliases.hpp>
 #include <golxzn/core/constants.hpp>
 
 namespace golxzn::core {

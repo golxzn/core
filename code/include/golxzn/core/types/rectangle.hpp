@@ -3,7 +3,7 @@
 #include <optional>
 #include <glm/vec2.hpp>
 #include "golxzn/core/utils/traits.hpp"
-#include "golxzn/core/types.hpp"
+#include "golxzn/core/aliases.hpp"
 
 namespace golxzn::core {
 

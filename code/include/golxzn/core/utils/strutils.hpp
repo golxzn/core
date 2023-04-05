@@ -1,6 +1,6 @@
 #pragma once
 
-#include <golxzn/core/types.hpp>
+#include <golxzn/core/aliases.hpp>
 #include <golxzn/core/utils/traits.hpp>
 
 namespace golxzn::core::utils {
