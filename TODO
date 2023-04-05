@@ -15,6 +15,7 @@
   [ ] Gif
 
 [ ] glm
+  [ ] Add glm dependency;
   [ ] Integrate color class with glm;
   [ ] Integrate angle class with glm;
 
