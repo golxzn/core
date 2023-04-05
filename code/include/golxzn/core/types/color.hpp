@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/vec4.hpp>
 #include <string_view>
 #include "golxzn/core/export.hpp"
 #include "golxzn/core/utils/traits.hpp"
@@ -33,6 +34,10 @@ struct GOLXZN_EXPORT color {
 		, b{ static_cast<u8>(color & 0xFF) }
 		, a{ static_cast<u8>((color >> 24) & 0xFF) } {}
 
+	template<class T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = false>
+	constexpr explicit color(const glm::vec<4, T> &vec) noexcept
+		: color{ vec.r, vec.g, vec.b, vec.a } {}
+
 	u8 *raw() noexcept;
 	const u8 *const raw() const noexcept;
 
@@ -41,6 +46,25 @@ struct GOLXZN_EXPORT color {
 	}
 	constexpr bool operator!=(const color &other) const noexcept {
 		return !this->operator==(other);
+	}
+
+	template<class T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = false>
+	constexpr bool operator==(const glm::vec<4, T> &vec) const noexcept {
+		return this->operator==(color{ vec });
+	}
+	template<class T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = false>
+	constexpr bool operator!=(const glm::vec<4, T> &vec) const noexcept {
+		return this->operator!=(color{ vec });
+	}
+
+	template<class T, std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>, bool> = false>
+	constexpr operator glm::vec<4, T>() const noexcept {
+		return glm::vec<4, T>{
+			static_cast<T>(r),
+			static_cast<T>(g),
+			static_cast<T>(b),
+			static_cast<T>(a)
+		};
 	}
 
 	union { u8 red{ max_alpha };   u8 r; };

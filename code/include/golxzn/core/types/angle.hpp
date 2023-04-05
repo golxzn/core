@@ -1,8 +1,8 @@
 #pragma once
 
+#include <variant>
 #include <golxzn/core/types.hpp>
 #include <golxzn/core/constants.hpp>
-#include <variant>
 
 namespace golxzn::core {
 
