@@ -6,6 +6,8 @@
 
 <br/>
 
+> WARNING! This project is under active development. The changes could brake your project!
+
 <h2>📜 Table of contents </h2>
 
 - [🧱 Project structure](#-project-structure)

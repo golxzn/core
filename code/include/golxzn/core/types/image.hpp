@@ -45,9 +45,9 @@ public:
 
 	// enum class overlap_policy{ discard_source, expand_target };
 
-	// void copy(const point2<i32> &pos, const ref &source, const rect<u32> &source_rect = {},
+	// void copy(const glm::vec<2, i32> &pos, const ref &source, const rect<u32> &source_rect = {},
 	// 	overlap_policy policy = overlap_policy::discard_source);
-	// void copy(const point2<i32> &pos, const image &source, const rect<u32> &source_rect = {},
+	// void copy(const glm::vec<2, i32> &pos, const image &source, const rect<u32> &source_rect = {},
 	// 	overlap_policy policy = overlap_policy::discard_source);
 
 	void crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept;
@@ -73,7 +73,7 @@ private:
 	u32 m_height{};
 	bytes m_data{};
 
-	// rect<u32> reduce_rect(point2<i32> &pos, const image &other, const rect<u32> &source_rect,
+	// rect<u32> reduce_rect(glm::vec<2, i32> &pos, const image &other, const rect<u32> &source_rect,
 	// 	overlap_policy policy) const noexcept;
 
 	static const color *const colors_ptr(const bytes &data) noexcept;

@@ -1,16 +1,16 @@
 #pragma once
 
 #include <optional>
+#include <glm/vec2.hpp>
 #include "golxzn/core/utils/traits.hpp"
 #include "golxzn/core/types.hpp"
-#include "golxzn/core/math/point.hpp"
 
 namespace golxzn::core {
 
 template<class T>
 struct rect{
 	using value_type = T;
-	using point_type = point2<value_type>;
+	using point_type = glm::vec<2, value_type>;
 
 	constexpr rect() noexcept = default;
 	constexpr rect(const rect &) noexcept = default;
