@@ -6,6 +6,8 @@
 
 <br/>
 
+> WARNING! This project is under active development. The changes could brake your project!
+
 <h2>📜 Table of contents </h2>
 
 - [🧱 Project structure](#-project-structure)
@@ -18,9 +20,11 @@
 ### Dependencies
 
 - CMake 3.23 or higher;
-- [spdlog::spdlog](https://github.com/gabime/spdlog.git) (MIT License);
+- [glm::glm](https://github.com/g-truc/glm.git) (The Happy Bunny License (Modified MIT License));
+- [spdlog::spdlog](https://github.com/gabime/spdlog) (MIT License);
 - [sago::platform_folders](https://github.com/sago007/PlatformFolders) (MIT License);
-- [ghcFilesystem::ghc_filesystem](https://github.com/gulrak/filesystem) (MIT License).
+- [ghcFilesystem::ghc_filesystem](https://github.com/gulrak/filesystem) (MIT License);
+- [stb_image](https://github.com/nothings/stb) (MIT License or Public Domain).
 
 ### Modules
 - __math__: <golxzn/core/math.hpp>;

@@ -15,8 +15,9 @@
   [ ] Gif
 
 [ ] glm
-  [ ] Integrate color class with glm;
-  [ ] Integrate angle class with glm;
+  [*] Add glm dependency;
+  [*] Integrate color class with glm;
+  [ ] Replace point and matrix classes;
 
 [ ] Platforms
   [ ] MacOS

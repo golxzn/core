@@ -2,7 +2,7 @@
 
 #include <limits>
 
-#include <golxzn/core/types.hpp>
+#include <golxzn/core/aliases.hpp>
 
 namespace golxzn::core::constants {
 

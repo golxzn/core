@@ -4,6 +4,7 @@ set(definitions "")
 set(includes)
 set(libraries "")
 set(compile_options "")
+set(export_targets "")
 
 set(BUILD_SHARED_LIBS OFF)
 

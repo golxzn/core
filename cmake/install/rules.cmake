@@ -17,7 +17,8 @@ install(DIRECTORY "${GOLXZNC_INCLUDE_DIR}/" "${PROJECT_BINARY_DIR}/export/"
 	COMPONENT ${package}_Development
 )
 
-install(TARGETS ${target}_lib
+
+install(TARGETS ${target}_lib ${export_targets}
 	EXPORT ${package}Targets
 	RUNTIME COMPONENT ${package}_Runtime
 	LIBRARY COMPONENT ${package}_Runtime
