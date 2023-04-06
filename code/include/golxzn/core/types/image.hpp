@@ -16,7 +16,16 @@ public:
 	using ref = sptr<image>;
 
 	static constexpr color default_fill_color{ 0xFFFFFFFF };
-	static constexpr u32 color_count{ 4 };
+
+	enum class channel : u32 {
+		grey       = 1,
+		grey_alpha = 2,
+		rgb        = 3,
+		rgba       = 4,
+
+		gray = grey,
+		gray_alpha = grey_alpha,
+	};
 
 	enum class flip_direction : u8 {
 		both,
@@ -26,22 +35,23 @@ public:
 
 	GOLXZN_DEFAULT_CLASS(image);
 
-	image(const u32 width, const u32 height, const color fill_color = default_fill_color) noexcept;
-	image(const u32 width, const u32 height, const bytes &data) noexcept;
-	image(const u32 width, const u32 height, bytes &&data) noexcept;
+	image(const u32 width, const u32 height, const channel img_channel, const color fill_color = default_fill_color) noexcept;
+	image(const u32 width, const u32 height, const channel img_channel, const bytes &data) noexcept;
+	image(const u32 width, const u32 height, const channel img_channel, bytes &&data) noexcept;
 
 	template<class InputIterator>
-	image(const u32 width, const u32 height, InputIterator _begin, InputIterator _end);
+	image(const u32 width, const u32 height, const channel img_channel, InputIterator _begin, InputIterator _end);
 
 	[[nodiscard]] u32 width() const noexcept;
 	[[nodiscard]] u32 height() const noexcept;
 	[[nodiscard]] u32 stride() const noexcept;
+	[[nodiscard]] u32 color_count() const noexcept;
 	[[nodiscard]] u32 bytes_count() const noexcept;
 	[[nodiscard]] const bytes &raw() const noexcept;
 	[[nodiscard]] bool empty() const noexcept;
 
-	[[nodiscard]] color &pixel(const u32 x, const u32 y);
 	[[nodiscard]] color pixel(const u32 x, const u32 y) const noexcept;
+	void set_pixel(const u32 x, const u32 y, const color color) noexcept;
 
 	// enum class overlap_policy{ discard_source, expand_target };
 
@@ -68,24 +78,26 @@ public:
 	[[nodiscard]] bool operator<=(const image &other) const noexcept;
 	[[nodiscard]] bool operator>=(const image &other) const noexcept;
 
+	static constexpr u32 channel_count(const channel channel) noexcept {
+		return static_cast<u32>(channel);
+	}
+	static constexpr channel to_channel(const u32 channel_count) noexcept {
+		return static_cast<channel>(channel_count);
+	}
 private:
 	u32 m_width{};
 	u32 m_height{};
+	channel m_channel{};
 	bytes m_data{};
 
 	// rect<u32> reduce_rect(glm::vec<2, i32> &pos, const image &other, const rect<u32> &source_rect,
 	// 	overlap_policy policy) const noexcept;
 
-	static const color *const colors_ptr(const bytes &data) noexcept;
-	static color *colors_ptr(bytes &data) noexcept;
-
-	const color *const colors_ptr() const noexcept;
-	color *colors_ptr() noexcept;
 };
 
 template<class InputIterator>
-image::image(const u32 width, const u32 height, InputIterator _begin, InputIterator _end)
-	: m_width{ width }, m_height{ height } {
+image::image(const u32 width, const u32 height, const channel ch, InputIterator _begin, InputIterator _end)
+	: m_width{ width }, m_height{ height }, m_channel{ ch } {
 	const auto num_of_pixels{ bytes_count() };
 	if (num_of_pixels > std::distance(_begin, _end)) {
 		clean();
@@ -95,5 +107,7 @@ image::image(const u32 width, const u32 height, InputIterator _begin, InputItera
 		m_data.assign(_begin, _end);
 	}
 }
+
+using colour = color;
 
 } // namespace golxzn::core::types

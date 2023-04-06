@@ -1,5 +1,6 @@
 #pragma once
 
+#include "golxzn/core/utils/algorithm.hpp"
 #include "golxzn/core/utils/error.hpp"
 #include "golxzn/core/utils/instantiated.hpp"
 #include "golxzn/core/utils/numeric.hpp"
