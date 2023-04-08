@@ -6,6 +6,33 @@
 
 namespace golxzn::core::resources {
 
+namespace {
+
+using iters_pair = std::pair<u8*, u8*>;
+iters_pair make_iters_pair(bytes &data) {
+	return std::make_pair(data.data(), data.data() + data.size());
+}
+
+int read_callback(void *user, char *data, int size) {
+	auto &[begin, end]{ *static_cast<iters_pair*>(user) };
+	if (std::distance(begin, end) < size)
+		size = static_cast<int>(std::distance(begin, end));
+
+	std::copy_n(begin, size, data);
+	begin += size;
+	return size;
+}
+void skip_callback(void *user, int n) {
+	auto &[begin, end]{ *static_cast<iters_pair*>(user) };
+	begin += n;
+}
+int eof_callback(void *user) {
+	auto &[begin, end]{ *static_cast<iters_pair*>(user) };
+	return std::distance(begin, end);
+}
+
+} // anonymous namespace
+
 bool manager::initialized{ false };
 std::error_code manager::err{};
 manager::write_mode manager::writing_mode{ manager::write_mode::rewrite };
@@ -74,49 +101,24 @@ types::image::ref manager::load_image(const std::string_view path) {
 	}
 
 	if (auto data{ load_binary(path) }; !data.empty()) {
+		const auto data_length{ data.size() };
 		i32 width{}, height{}, channels{};
-		const auto pixels{ stbi_load_from_memory(
-			data.data(), static_cast<i32>(data.size()), &width, &height, &channels, 0
-		) };
+		stbi_io_callbacks callbacks{ &read_callback, &skip_callback, &eof_callback };
+		auto iters_pair{ make_iters_pair(data) };
+		const auto pixels{ stbi_load_from_callbacks(&callbacks, &iters_pair, &width, &height, &channels, 0) };
 		if (pixels == nullptr) {
 			spdlog::error("[{}] Cannot load image from path '{}': {}",
 				class_name, path, stbi_failure_reason());
 			return nullptr;
 		}
+
 		const auto pixels_count{ width * height };
-		if (channels == types::image::color_count) {
-			auto img{ std::make_shared<types::image>(
-				static_cast<u32>(width), static_cast<u32>(height),
-				pixels, pixels + (pixels_count * channels)
-			) };
-			stbi_image_free(pixels);
-			return img;
-		}
-
-		if (channels <= 0 || channels > 4) {
-			spdlog::error("[{}] Cannot load image: invalid number of channels: {}",
-				class_name, channels);
-			stbi_image_free(pixels);
-			return nullptr;
-		}
-
-		static const auto default_color{ types::image::default_fill_color.raw() };
-		bytes new_pixels;
-		new_pixels.reserve(pixels_count * types::image::color_count);
-		usize offset{ 0 };
-		for (usize i{ 0 }; i < pixels_count; ++i) {
-			for (i32 j{ 0 }; j < channels; ++j) {
-				new_pixels.emplace_back(pixels[offset + j]);
-			}
-			for (i32 j{ channels }; j < types::image::color_count; ++j) {
-				new_pixels.emplace_back(default_color[j]);
-			}
-			offset += channels;
-		}
+		auto img{ std::make_shared<types::image>(static_cast<u32>(width), static_cast<u32>(height),
+			types::image::to_channel(channels),
+			pixels, pixels + (pixels_count * channels)
+		) };
 		stbi_image_free(pixels);
-		return std::make_shared<types::image>(
-			static_cast<u32>(width), static_cast<u32>(height), std::move(new_pixels)
-		);
+		return img;
 	}
 	spdlog::info("[{}] Cannot load image: empty data.", class_name);
 	return nullptr;
@@ -191,25 +193,25 @@ bool manager::save_image(const std::string_view path, const types::image::ref &i
 	switch(img_type) {
 		case image_type::png:
 			convert_status = stbi_write_png_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->raw().data(), img->stride());
+				img->width(), img->height(), img->color_count(), img->raw().data(), img->stride());
 			break;
 		case image_type::bmp:
 			convert_status = stbi_write_bmp_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->raw().data());
+				img->width(), img->height(), img->color_count(), img->raw().data());
 			break;
 		case image_type::tga:
 			convert_status = stbi_write_tga_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->raw().data());
+				img->width(), img->height(), img->color_count(), img->raw().data());
 			break;
 		/*
 		case image_type::hdr:
 			convert_status = stbi_write_hdr_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->data().data());
+				img->width(), img->height(), img->color_count(), img->data().data());
 			break;
 		*/
 		case image_type::jpg:
 			convert_status = stbi_write_jpg_to_func(write_func, &ctx,
-				img->width(), img->height(), types::image::color_count, img->raw().data(), 90);
+				img->width(), img->height(), img->color_count(), img->raw().data(), 90);
 			break;
 		default:
 			spdlog::error("[{}] Cannot save image: format is not supported", class_name);

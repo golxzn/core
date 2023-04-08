@@ -65,56 +65,88 @@ TEST_CASE("Image", "[golxzn][core][tests]") {
 		expand_test("white"_clr,       100, 100, 100, 100);  // [700, 700] -> [900, 900]
 	}
 
-	// SECTION("copy") {
-	// 	using overlap = types::image::overlap_policy;
-	// 	using p = point2<i32>;
+	SECTION("copy") {
+		static constexpr std::string_view src_image_path{ "res://images/test.jpg" };
+		using overlap = types::image::overlap_policy;
+		using p = types::image::position;
 
-	// 	auto target{ res_man::load_image("res://images/test.jpg") };
-	// 	const auto source{ res_man::load_image("res://images/test.png") };
+		auto source{ res_man::load_image(src_image_path) };
+		const auto target{ res_man::load_image("res://images/test.png") };
 
-	// 	u32 id{};
+		u32 id{};
 
-	// 	const auto copy_test = [&] (p at, rect<u32> src_rect, overlap policy, bool save = false) {
-	// 		target->copy(at, source, src_rect, policy);
-	// 		if (!save) return;
+		const auto copy_test = [&] (p at, rect<u32> src_rect, overlap policy, bool alpha = false, bool save = false) {
+			source->copy(at, target, src_rect, true, policy);
+			if (!save) return;
 
-	// 		std::string name{ "user://images/copied/" };
-	// 		name += std::to_string(id++);
-	// 		name += (policy == overlap::discard_source ? "-discard.png" : "-expand.png");
-	// 		res_man::save_image(name, target);
-	// 	};
+			std::string name{ "user://images/copied/" };
+			name += std::to_string(id++);
+			// name += (alpha ? "-merge_alpha" : "-copy_alpha");
+			name += (policy == overlap::discard_target ? "-discard.png" : "-expand.png");
+			res_man::save_image(name, source);
+		};
 
+		const auto t_w{ static_cast<i32>(source->width()) };
+		const auto t_h{ static_cast<i32>(source->height()) };
+		const auto s_w{ static_cast<i32>(target->width()) };
+		const auto s_h{ static_cast<i32>(target->height()) };
+		const rect<u32> src_rect{ 10, 10, s_w - 20, s_h - 20 };
 
-	// 	const auto t_w = [&target] { return static_cast<i32>(target->width());  };
-	// 	const auto t_h = [&target] { return static_cast<i32>(target->height()); };
-	// 	const auto s_w = [&source] { return static_cast<i32>(source->width());  };
-	// 	const auto s_h = [&source] { return static_cast<i32>(source->height()); };
+		copy_test(p{           0_i32,           0_i32 }, {}, overlap::discard_target);                    // left upper corner
+		copy_test(p{       t_w - s_w,           0_i32 }, {}, overlap::discard_target);                    // right upper corner
+		copy_test(p{       t_w - s_w,       t_h - s_h }, {}, overlap::discard_target);                    // right lower corner
+		copy_test(p{           0_i32,       t_h - s_h }, {}, overlap::discard_target);                    // left lower corner
+		copy_test(p{ (t_w - s_w) / 2, (t_h - s_h) / 2 }, {}, overlap::discard_target, false, true);  // center
 
-	// 	copy_test(p{               0_i32,               0_i32 }, {}, overlap::discard_source);                    // left upper corner
-	// 	copy_test(p{       t_w() - s_w(),               0_i32 }, {}, overlap::discard_source);                    // right upper corner
-	// 	copy_test(p{       t_w() - s_w(),       t_h() - s_h() }, {}, overlap::discard_source);                    // right lower corner
-	// 	copy_test(p{               0_i32,       t_h() - s_h() }, {}, overlap::discard_source);                    // left lower corner
-	// 	copy_test(p{ (t_w() - s_w()) / 2, (t_h() - s_h()) / 2 }, {}, overlap::discard_source, true);  // center
+		source = res_man::load_image(src_image_path);
+		copy_test(p{           0_i32,           0_i32 }, src_rect, overlap::discard_target);                    // left upper corner
+		copy_test(p{       t_w - s_w,           0_i32 }, src_rect, overlap::discard_target);                    // right upper corner
+		copy_test(p{       t_w - s_w,       t_h - s_h }, src_rect, overlap::discard_target);                    // right lower corner
+		copy_test(p{           0_i32,       t_h - s_h }, src_rect, overlap::discard_target);                    // left lower corner
+		copy_test(p{ (t_w - s_w) / 2, (t_h - s_h) / 2 }, src_rect, overlap::discard_target, false, true);  // center
 
-	// 	target = res_man::load_image("res://images/test.jpg");
-	// 	copy_test(p{               0_i32,               0_i32 }, {}, overlap::expand_target);                    // left upper corner
-	// 	copy_test(p{       t_w() - s_w(),               0_i32 }, {}, overlap::expand_target);                    // right upper corner
-	// 	copy_test(p{       t_w() - s_w(),       t_h() - s_h() }, {}, overlap::expand_target);                    // right lower corner
-	// 	copy_test(p{               0_i32,       t_h() - s_h() }, {}, overlap::expand_target);                    // left lower corner
-	// 	copy_test(p{ (t_w() - s_w()) / 2, (t_h() - s_h()) / 2 }, {}, overlap::expand_target, true);  // center
+		source = res_man::load_image(src_image_path);
+		copy_test(p{           0_i32,           0_i32 }, {}, overlap::expand_source);                    // left upper corner
+		copy_test(p{       t_w - s_w,           0_i32 }, {}, overlap::expand_source);                    // right upper corner
+		copy_test(p{       t_w - s_w,       t_h - s_h }, {}, overlap::expand_source);                    // right lower corner
+		copy_test(p{           0_i32,       t_h - s_h }, {}, overlap::expand_source);                    // left lower corner
+		copy_test(p{ (t_w - s_w) / 2, (t_h - s_h) / 2 }, {}, overlap::expand_source, false, true);  // center
 
-	// 	target = res_man::load_image("res://images/test.jpg");
-	// 	copy_test(p{      -(s_w() / 2),      -(s_h() / 2) }, {}, overlap::discard_source);       // left upper corner
-	// 	copy_test(p{ t_w() - s_w() / 2,      -(s_h() / 2) }, {}, overlap::discard_source);       // right upper corner
-	// 	copy_test(p{ t_w() - s_w() / 2, t_h() - s_h() / 2 }, {}, overlap::discard_source);       // right lower corner
-	// 	copy_test(p{      -(s_w() / 2), t_h() - s_h() / 2 }, {}, overlap::discard_source, true); // left lower corner
+		source = res_man::load_image(src_image_path);
+		copy_test(p{           0_i32,           0_i32 }, src_rect, overlap::expand_source);                    // left upper corner
+		copy_test(p{       t_w - s_w,           0_i32 }, src_rect, overlap::expand_source);                    // right upper corner
+		copy_test(p{       t_w - s_w,       t_h - s_h }, src_rect, overlap::expand_source);                    // right lower corner
+		copy_test(p{           0_i32,       t_h - s_h }, src_rect, overlap::expand_source);                    // left lower corner
+		copy_test(p{ (t_w - s_w) / 2, (t_h - s_h) / 2 }, src_rect, overlap::expand_source, false, true);  // center
 
-	// 	target = res_man::load_image("res://images/test.jpg");
-	// 	copy_test(p{      -(s_w() / 2),      -(s_h() / 2) }, {}, overlap::expand_target);       // left upper corner
-	// 	copy_test(p{ t_w() - s_w() / 2, t_h() - s_h() / 2 }, {}, overlap::expand_target);       // right lower corner
-	// 	copy_test(p{ t_w() - s_w() / 2,                 0 }, {}, overlap::expand_target);       // right upper corner
-	// 	copy_test(p{                 0, t_h() - s_h() / 2 }, {}, overlap::expand_target, true); // left lower corner
-	// }
+		source = res_man::load_image(src_image_path);
+		copy_test(p{    -(s_w / 2),    -(s_h / 2) }, {}, overlap::discard_target);       // left upper corner
+		copy_test(p{ t_w - s_w / 2,    -(s_h / 2) }, {}, overlap::discard_target);       // right upper corner
+		copy_test(p{ t_w - s_w / 2, t_h - s_h / 2 }, {}, overlap::discard_target);       // right lower corner
+		copy_test(p{    -(s_w / 2), t_h - s_h / 2 }, {}, overlap::discard_target, false, true); // left lower corner
+
+		source = res_man::load_image(src_image_path);
+		copy_test(p{    -(s_w / 2),    -(s_h / 2) }, src_rect, overlap::discard_target);       // left upper corner
+		copy_test(p{ t_w - s_w / 2,    -(s_h / 2) }, src_rect, overlap::discard_target);       // right upper corner
+		copy_test(p{ t_w - s_w / 2, t_h - s_h / 2 }, src_rect, overlap::discard_target);       // right lower corner
+		copy_test(p{    -(s_w / 2), t_h - s_h / 2 }, src_rect, overlap::discard_target, false, true); // left lower corner
+
+		source = res_man::load_image(src_image_path);
+		copy_test(p{ t_w - s_w / 2, t_h - s_h / 2 }, {}, overlap::expand_source);       // right lower corner
+		copy_test(p{    -(s_w / 2),    -(s_h / 2) }, {}, overlap::expand_source, false, true);       // left upper corner
+
+		source = res_man::load_image(src_image_path);
+		copy_test(p{ t_w - s_w / 2, t_h - s_h / 2 }, src_rect, overlap::expand_source);       // right lower corner
+		copy_test(p{    -(s_w / 2),    -(s_h / 2) }, src_rect, overlap::expand_source, false, true);       // left upper corner
+
+		source = res_man::load_image(src_image_path);
+		copy_test(p{ t_w - s_w / 2,    -(s_h / 2) }, {}, overlap::expand_source);       // right upper corner
+		copy_test(p{    -(s_w / 2),           t_h }, {}, overlap::expand_source, false, true); // left lower corner
+
+		source = res_man::load_image(src_image_path);
+		copy_test(p{ t_w - s_w / 2,    -(s_h / 2) }, src_rect, overlap::expand_source);       // right upper corner
+		copy_test(p{    -(s_w / 2),           t_h }, src_rect, overlap::expand_source, false, true); // left lower corner
+	}
 }
 
 // TEST_CASE("Image", "[golxzn][core][benchmarks]") {
