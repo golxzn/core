@@ -14,10 +14,12 @@ class GOLXZN_EXPORT image {
 	static constexpr std::string_view class_name{ "golxzn::core::types::image" };
 public:
 	using ref = sptr<image>;
+	using position = glm::vec<2, i32>;
 
 	static constexpr color default_fill_color{ 0xFFFFFFFF };
 
 	enum class channel : u32 {
+		invalid    = 0,
 		grey       = 1,
 		grey_alpha = 2,
 		rgb        = 3,
@@ -47,18 +49,22 @@ public:
 	[[nodiscard]] u32 stride() const noexcept;
 	[[nodiscard]] u32 color_count() const noexcept;
 	[[nodiscard]] u32 bytes_count() const noexcept;
+	[[nodiscard]] channel get_channel() const noexcept;
 	[[nodiscard]] const bytes &raw() const noexcept;
 	[[nodiscard]] bool empty() const noexcept;
 
 	[[nodiscard]] color pixel(const u32 x, const u32 y) const noexcept;
 	void set_pixel(const u32 x, const u32 y, const color color) noexcept;
 
-	// enum class overlap_policy{ discard_source, expand_target };
+	enum class overlap_policy{
+		discard_target,
+		expand_source
+	};
 
-	// void copy(const glm::vec<2, i32> &pos, const ref &source, const rect<u32> &source_rect = {},
-	// 	overlap_policy policy = overlap_policy::discard_source);
-	// void copy(const glm::vec<2, i32> &pos, const image &source, const rect<u32> &source_rect = {},
-	// 	overlap_policy policy = overlap_policy::discard_source);
+	void copy(const position &pos, const ref &target, const rect<u32> &target_rect = {},
+		const bool apply_alpha = true, overlap_policy policy = overlap_policy::discard_target);
+	void copy(const position &pos, const image &target, const rect<u32> &target_rect = {},
+		const bool apply_alpha = true, overlap_policy policy = overlap_policy::discard_target);
 
 	void crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept;
 	void crop(const rect<u32> &rect) noexcept;
@@ -87,11 +93,8 @@ public:
 private:
 	u32 m_width{};
 	u32 m_height{};
-	channel m_channel{};
+	channel m_channel{ channel::invalid };
 	bytes m_data{};
-
-	// rect<u32> reduce_rect(glm::vec<2, i32> &pos, const image &other, const rect<u32> &source_rect,
-	// 	overlap_policy policy) const noexcept;
 
 };
 

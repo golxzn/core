@@ -49,6 +49,9 @@ u32 image::color_count() const noexcept {
 u32 image::bytes_count() const noexcept {
 	return m_width * m_height * color_count();
 }
+image::channel image::get_channel() const noexcept {
+	return m_channel;
+}
 const bytes &image::raw() const noexcept {
 	return m_data;
 }
@@ -145,66 +148,97 @@ void image::flip(const flip_direction dir) noexcept {
 	}
 }
 
-// void image::copy(const point2<i32> &pos, const ref &source, const rect<u32> &source_rect, overlap_policy policy) {
-// 	if (source != nullptr) {
-// 		copy(pos, *source, source_rect, policy);
-// 	}
-// }
+void image::copy(const position &pos, const ref &target, const rect<u32> &target_rect, const bool alpha, overlap_policy policy) {
+	if (target != nullptr) {
+		copy(pos, *target, target_rect, alpha, policy);
+	}
+}
 
-// void image::copy(const point2<i32> &pos, const image &source, const rect<u32> &source_rect, overlap_policy policy) {
-// 	if (empty() || source.empty()) {
-// 		const static auto b2str{ [](auto value) { return value ? "empty" : "not empty"; } };
-// 		spdlog::warn("[{}] Cannot copy empty images. (this: {}, source: {})",
-// 			class_name, b2str(empty()), b2str(source.empty()));
-// 		return;
-// 	}
+void image::copy(const position &pos, const image &target, const rect<u32> &target_rect, const bool apply_alpha, overlap_policy policy) {
+	if (target.empty()) {
+		spdlog::warn("[{}] Cannot copy empty images.", class_name);
+		return;
+	}
+	if (empty()) {
+		if (policy == overlap_policy::discard_target) return;
 
-// 	auto position{ pos };
-// 	rect<u32> src_frame{ reduce_rect(position, source, source_rect, policy) };
-// 	rect<u32> dest_frame{ 0, 0, m_width, m_height };
+		*this = target;
+		return;
+	}
 
-// 	auto result_frame{ dest_frame.overlap(rect<u32>{
-// 		static_cast<u32>(position.at(0) > 0 ? position.at(0) : 0),
-// 		static_cast<u32>(position.at(1) > 0 ? position.at(0) : 0),
-// 		src_frame.width, src_frame.height
-// 	}) };
-// 	if (result_frame == src_frame) {
-// 		m_data = source.m_data;
-// 		m_width = source.m_width;
-// 		m_height = source.m_height;
-// 		return;
-// 	}
+	// 1. Calculate positions
+	const rect<i64> source_rect{ 0, 0, m_width, m_height };
+	rect<i64> src_rect{ source_rect };
+	rect<u32> tgt_rect{
+		target_rect.x, target_rect.y,
+		(target_rect.width != 0 ? target_rect.width : target.m_width),
+		(target_rect.height != 0 ? target_rect.height : target.m_height)
+	};
+	rect<i64> moved_tgt_rect{ static_cast<rect<i64>>(tgt_rect).translate(pos) };
 
-// 	if (policy == overlap_policy::expand_target && (pos.at(0) < 0 || pos.at(1) < 0  || dest_frame < result_frame)) {
-// 		const auto left_padding{ pos.at(0) < 0 ? std::abs(pos.at(0)) : 0 };
-// 		const auto top_padding{ pos.at(1) < 0 ? std::abs(pos.at(1)) : 0 };
-// 		const auto right_padding{ result_frame.width - dest_frame.width };
-// 		const auto bottom_padding{ result_frame.height - dest_frame.height };
-// 		expand(left_padding, top_padding, right_padding, bottom_padding);
-// 		dest_frame = rect<u32>{ 0, 0, m_width, m_height };
-// 		position = {};
-// 		src_frame = reduce_rect(position, source, source_rect, overlap_policy::discard_source);
-// 		result_frame = dest_frame.overlap(src_frame);
-// 	}
+	if (policy == overlap_policy::expand_source) {
+		src_rect = src_rect.overlap(moved_tgt_rect);
+	}
+	if (!src_rect.has_intersection(moved_tgt_rect)) return;
 
-// 	if (dest_frame == result_frame) {
-// 		const auto source_line_start_offset{ src_frame.left() };
-// 		const auto source_line_end_offset{ source.width() - src_frame.right() };
+	// 2. Expand image if needed
+	if (policy == overlap_policy::expand_source && source_rect != src_rect) {
+		const auto left{ pos.x < 0 ? static_cast<u32>(-pos.x) : 0 };
+		const auto up{ pos.y < 0 ? static_cast<u32>(-pos.y) : 0 };
+		const auto right{ (pos.x + static_cast<i64>(tgt_rect.width)) - static_cast<i64>(m_width) };
+		const auto down{ (pos.y + static_cast<i64>(tgt_rect.height)) - static_cast<i64>(m_height) };
 
-// 		auto target_ptr{ colors_ptr() };
-// 		auto source_ptr{ source.colors_ptr() + src_frame.top() * source.width() };
+		expand(left, up, right < 0 ? 0 : static_cast<u32>(right), down < 0 ? 0 : static_cast<u32>(down));
+		src_rect = { 0, 0, m_width, m_height };
+		moved_tgt_rect = static_cast<rect<i64>>(tgt_rect).translate(position{ pos.x + left, pos.y + up });
+	}
 
-// 		target_ptr += position.at(1) * m_width;
-// 		for (u32 row{}; row < src_frame.height; ++row) {
-// 			target_ptr += position.at(0);
-// 			source_ptr += source_line_start_offset;
-// 			target_ptr = std::copy_n(source_ptr, src_frame.width, target_ptr);
-// 			source_ptr += source_line_end_offset + src_frame.width;
-// 			target_ptr += m_width - (position.at(0) + src_frame.width);
-// 		}
-// 		return;
-// 	}
-// }
+	const rect<i64> insert_rect{ src_rect.intersection(moved_tgt_rect).value() };
+
+	if (policy == overlap_policy::discard_target) {
+		tgt_rect.x += static_cast<u32>(insert_rect.left() - moved_tgt_rect.left());
+		tgt_rect.y += static_cast<u32>(insert_rect.top() - moved_tgt_rect.top());
+		tgt_rect.width = static_cast<u32>(insert_rect.width);
+		tgt_rect.height = static_cast<u32>(insert_rect.height);
+	}
+
+	// 3. Copy data
+
+	const u32 color_cnt{ color_count() };
+	const u32 top_offset{ static_cast<u32>(insert_rect.top() * src_rect.width) * color_cnt };
+	const u32 left_offset{ static_cast<u32>(insert_rect.left()) * color_cnt };
+	const u32 right_offset{ static_cast<u32>(src_rect.right() - insert_rect.right()) * color_cnt };
+	auto src_data_ptr{ m_data.data() + top_offset };
+
+	const u32 tgt_color_cnt{ target.color_count() };
+	const u32 tgt_top_offset{ tgt_rect.top() * target.m_width * tgt_color_cnt };
+	const u32 tgt_left_offset{ tgt_rect.left() * tgt_color_cnt };
+	const u32 tgt_right_offset{ (target.m_width - tgt_rect.right()) * tgt_color_cnt };
+
+	auto tgt_data_ptr{ target.m_data.data() + tgt_top_offset };
+
+	const u32 insert_width{ static_cast<u32>(insert_rect.width) * color_cnt };
+	const u32 tgt_insert_width{ static_cast<u32>(insert_rect.width) * tgt_color_cnt };
+	const size color_diff{ static_cast<size>(color_cnt) - static_cast<size>(tgt_color_cnt) };
+
+	const bool copy_alpha{
+		(apply_alpha && traits::any_from(target.get_channel(), channel::rgb, channel::grey))
+	};
+
+	if (!copy_alpha) {
+		for (auto y{ insert_rect.top() }; y < insert_rect.bottom(); ++y) {
+			src_data_ptr += left_offset;
+			tgt_data_ptr += tgt_left_offset;
+
+			src_data_ptr = utils::copy_n_m(tgt_data_ptr, insert_width, tgt_color_cnt, color_diff, src_data_ptr) + right_offset;
+			tgt_data_ptr += tgt_insert_width + tgt_right_offset;
+		}
+		return;
+	}
+
+	/// @todo: Implement alpha channel copy
+	spdlog::info("[{}] Sorry. Alpha channel copy is not implemented yet. :<", class_name);
+}
 
 void image::crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept {
 	if (empty()) {
@@ -359,35 +393,5 @@ bool image::operator<=(const image &other) const noexcept {
 bool image::operator>=(const image &other) const noexcept {
 	return !(other < *this);
 }
-
-// rect<u32> image::reduce_rect(point2<i32> &pos, const image &source,
-// 	const rect<u32> &source_rect, overlap_policy policy) const noexcept {
-
-// 	rect<u32> frame{
-// 		source_rect.empty()
-// 			? rect<u32>{ 0, 0, source.m_width, source.m_height }
-// 			: source_rect
-// 	};
-// 	if (frame.right() > source.m_width)   frame.width = source.m_width - frame.x;
-// 	if (frame.bottom() > source.m_height) frame.height = source.m_height - frame.y;
-
-// 	if (overlap_policy::discard_source == policy) {
-// 		if (const auto abs_x{ std::abs(pos.at(0)) }; pos.at(0) < 0) {
-// 			pos.at(0) = 0;
-// 			frame.x += abs_x;
-// 			frame.width -= abs_x;
-// 		}
-// 		if (const auto abs_y{ std::abs(pos.at(1)) }; pos.at(1) < 0) {
-// 			pos.at(1) = 0;
-// 			frame.y += abs_y;
-// 			frame.height -= abs_y;
-// 		}
-
-// 		if (const auto delta{ m_width - pos.at(0) }; frame.width > delta)   frame.width = delta;
-// 		if (const auto delta{ m_height - pos.at(1) }; frame.height > delta) frame.height = delta;
-// 	}
-// 	return frame;
-// }
-
 
 } // namespace golxzn::core::types

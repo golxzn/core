@@ -10,7 +10,7 @@ namespace golxzn::core {
 template<class T>
 struct rect{
 	using value_type = T;
-	using point_type = glm::vec<2, value_type>;
+	template<class U> using point_type = glm::vec<2, U>;
 
 	constexpr rect() noexcept = default;
 	constexpr rect(const rect &) noexcept = default;
@@ -20,6 +20,11 @@ struct rect{
 	constexpr rect(const value_type x, const value_type y, const value_type w, const value_type h) noexcept
 		: x{ x }, y{ y }, width{ w }, height{ h } {}
 
+	template<class U>
+	constexpr rect(const rect<U> &other) noexcept
+		: x{ static_cast<value_type>(other.x) }, y{ static_cast<value_type>(other.y) }
+		, width{ static_cast<value_type>(other.width) }, height{ static_cast<value_type>(other.height) } {}
+
 	constexpr bool empty() const noexcept{ return traits::all_from(T{}, x, y, width, height); };
 
 	constexpr value_type left() const noexcept { return x; }
@@ -27,12 +32,25 @@ struct rect{
 	constexpr value_type right() const noexcept { return x + width; }
 	constexpr value_type bottom() const noexcept { return y + height; }
 	constexpr value_type area() const noexcept { return width * height; }
-	constexpr point_type center() const noexcept { return { right() / 2, bottom() / 2 }; }
+	constexpr point_type<T> center() const noexcept { return { right() / 2, bottom() / 2 }; }
 
-	constexpr bool contains(const value_type px, const value_type py) const noexcept {
+	template<class U>
+	constexpr rect &translate(const point_type<U> &offset) noexcept {
+		x += static_cast<T>(offset.x);
+		y += static_cast<T>(offset.y);
+		return *this;
+	}
+	template<class U>
+	constexpr rect translate(const point_type<U> &offset) const noexcept { return rect{ *this }.move(offset); }
+
+	template<class U>
+	constexpr bool contains(const U point_x, const U point_y) const noexcept {
+		const auto px{ static_cast<T>(point_x) };
+		const auto py{ static_cast<T>(point_y) };
 		return px >= left() && px <= right() && py >= top() && py <= bottom();
 	}
-	constexpr bool contains(const point_type &p) const noexcept { return contains(p.x, p.y); }
+	template<class U>
+	constexpr bool contains(const point_type<U> &p) const noexcept { return contains(p.x, p.y); }
 
 	constexpr std::optional<rect> intersection(const rect &other) const noexcept {
 		const auto left{ std::max(this->left(), other.left()) };
