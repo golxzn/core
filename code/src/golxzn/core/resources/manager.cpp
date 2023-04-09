@@ -174,7 +174,6 @@ bool manager::save_image(const std::string_view path, const types::image::ref &i
 		return false;
 	}
 
-// typedef void stbi_write_func(void *context, void *data, int size);
 	struct context{
 		bytes buffer;
 		bool save_status;
