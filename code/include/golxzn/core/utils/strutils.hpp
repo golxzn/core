@@ -1,9 +1,13 @@
 #pragma once
 
+#include <string>
+#include <vector>
 #include <locale>
 #include <codecvt>
-#include <golxzn/core/aliases.hpp>
-#include <golxzn/core/utils/traits.hpp>
+#include <string_view>
+
+#include "golxzn/core/aliases.hpp"
+#include "golxzn/core/utils/traits.hpp"
 
 namespace golxzn::core::utils {
 
@@ -16,49 +20,35 @@ namespace golxzn::core::utils {
 [[nodiscard]] constexpr size_t size(const char &) noexcept { return sizeof(char); }
 [[nodiscard]] constexpr size_t size(const wchar_t &) noexcept { return sizeof(wchar_t); }
 [[nodiscard]] constexpr size_t size() noexcept { return {}; }
+template<class T, size_t N>
+[[nodiscard]] constexpr size_t size(const T (&)[N]) noexcept { return N; }
 
-template<class ...Args>
-[[nodiscard]] size_t size(const Args &...args) noexcept { return ((size(args) - 1) + ...) + 1; }
-template<class ...Args>
-[[nodiscard]] size_t size(const char *s, const Args &...args) noexcept { return std::strlen(s) + size(args...); }
-template<class ...Args>
-[[nodiscard]] size_t size(const wchar_t *s, const Args &...args) noexcept { return std::wcslen(s) + size(args...); }
-template<class ...Args>
-[[nodiscard]] size_t size(const std::string &s, const Args &...args) noexcept { return s.size() + size(args...); }
-template<class ...Args>
-[[nodiscard]] size_t size(const std::wstring &s, const Args &...args) noexcept { return s.size() + size(args...); }
-template<class ...Args>
-[[nodiscard]] size_t size(const std::string_view &s, const Args &...args) noexcept { return s.size() + size(args...); }
-template<class ...Args>
-[[nodiscard]] size_t size(const std::wstring_view &s, const Args &...args) noexcept { return s.size() + size(args...); }
-template<class ...Args>
-[[nodiscard]] size_t size(const char &c, const Args &...args) noexcept { return sizeof(c) + size(args...); }
-template<class ...Args>
-[[nodiscard]] size_t size(const wchar_t &c, const Args &...args) noexcept { return sizeof(c) + size(args...); }
+template<class T, class ...Args>
+[[nodiscard]] size_t size(const T &head, const Args &...args) noexcept { return size(head) + size(args...); }
 
-template<class T> std::wstring str_to_wide(T str);
+template<class T> std::wstring str_to_wide(T str) { return std::to_wstring(str); }
 
-template<> std::wstring str_to_wide<const std::wstring &>(const std::wstring &str) { return str; }
-template<> std::wstring str_to_wide<const std::wstring_view &>(const std::wstring_view &str) { return std::wstring{ str }; }
-template<> std::wstring str_to_wide<const wchar_t *>(const wchar_t *str) { return std::wstring{ str }; }
-template<> std::wstring str_to_wide<wchar_t>(const wchar_t c) { return std::wstring{ c }; }
+template<> inline std::wstring str_to_wide<const std::wstring &>(const std::wstring &str) { return str; }
+template<> inline std::wstring str_to_wide<const std::wstring_view &>(const std::wstring_view &str) { return std::wstring{ str }; }
+template<> inline std::wstring str_to_wide<const wchar_t *>(const wchar_t *str) { return std::wstring{ str }; }
+template<> inline std::wstring str_to_wide<wchar_t>(const wchar_t c) { return std::wstring{ c }; }
 
-template<> std::wstring str_to_wide<const char *>(const char *str) {
+template<> inline std::wstring str_to_wide<const char *>(const char *str) {
 	using convert_typeX = std::codecvt_utf8<wchar_t>;
 	std::wstring_convert<convert_typeX, wchar_t> converterX;
 	return converterX.from_bytes(str);
 }
-template<> std::wstring str_to_wide<const std::string &>(const std::string &str) {
+template<> inline std::wstring str_to_wide<const std::string &>(const std::string &str) {
 	return str_to_wide(str.c_str());
 }
-template<> std::wstring str_to_wide<const std::string_view &>(const std::string_view &str) {
+template<> inline std::wstring str_to_wide<const std::string_view &>(const std::string_view &str) {
 	return str_to_wide(str.data());
 }
-template<> std::wstring str_to_wide<char>(const char c) {
+template<> inline std::wstring str_to_wide<char>(const char c) {
 	return std::wstring{ static_cast<wchar_t>(c) };
 }
 
-std::string wide_to_str(const std::wstring &wstr) {
+inline std::string wide_to_str(const std::wstring &wstr) {
 	using convert_typeX = std::codecvt_utf8<wchar_t>;
 	std::wstring_convert<convert_typeX, wchar_t> converterX;
 
@@ -77,8 +67,106 @@ template<class ...Args>
 [[nodiscard]] std::wstring concat_wide(const Args &...args) noexcept {
 	std::wstring result;
 	result.reserve(size(args...));
-	(result.append(str_to_widt(args)), ...);
+	(result.append(str_to_wide(args)), ...);
 	return result;
 }
+
+template<class T>
+[[nodiscard]] core::usize count_frequency(
+		const std::basic_string_view<T> &str, const std::basic_string_view<T> &pattern) noexcept {
+	const auto M{ size(pattern) };
+	const auto N{ size(str) };
+	if (M > N) return 0;
+
+	size_t res{};
+
+	for (size_t i{}; i <= N - M; ++i) {
+		size_t j;
+		for (j = 0; j < M; ++j) {
+			if (str[i + j] != pattern[j]) break;
+		}
+
+		if (j == M) res++;
+	}
+	return static_cast<core::usize>(res);
+}
+template<class T>
+[[nodiscard]] core::usize count_frequency(const std::basic_string_view<T> &str, const T pattern) noexcept {
+	return std::count(std::begin(str), std::end(str), pattern);
+}
+
+template<class T>
+[[nodiscard]] std::vector<std::basic_string<T>> split(
+		const std::basic_string_view<T> &str, const std::basic_string_view<T> &delimiter) noexcept {
+	const auto delimiters_count{ count_frequency(str, delimiter) + 1 };
+	if (delimiters_count == 1) return { std::basic_string<T>{ str } };
+
+	std::vector<std::basic_string<T>> tokens;
+	tokens.reserve(static_cast<size_t>(delimiters_count));
+	size_t prev = 0;
+	size_t pos = 0;
+	do {
+		pos = str.find_first_of(delimiter, prev);
+		if (pos == str.npos) pos = str.length();
+
+		if (auto token{ str.substr(prev, pos - prev) }; !token.empty()) {
+			tokens.emplace_back(std::move(token));
+		}
+		prev = pos + 1;
+	} while (pos < str.length() && prev < str.length());
+
+	return tokens;
+}
+
+template<class T>
+[[nodiscard]] std::vector<std::basic_string<T>> split(
+		const std::basic_string_view<T> &str, const T &delimiter) noexcept {
+
+	const auto delimiters_count{ count_frequency(str, delimiter) + 1};
+	if (delimiters_count == 1) return { std::basic_string<T>{ str } };
+
+	std::vector<std::basic_string<T>> tokens;
+	tokens.reserve(static_cast<size_t>(delimiters_count));
+	size_t prev = 0;
+	size_t pos = 0;
+	do {
+		pos = str.find_first_of(delimiter, prev);
+		if (pos == str.npos) pos = str.length();
+
+		if (auto token{ str.substr(prev, pos - prev) }; !token.empty()) {
+			tokens.emplace_back(std::move(token));
+		}
+		prev = pos + 1;
+	} while (pos < str.length() && prev < str.length());
+
+	return tokens;
+}
+
+template<class T>
+[[nodiscard]] auto dir_and_extension(const std::basic_string_view<T> &name) noexcept
+		-> std::pair<std::remove_all_extents_t<decltype(name)>, std::remove_all_extents_t<decltype(name)>> {
+	using view_type = std::remove_all_extents_t<decltype(name)>;
+
+	if (const auto dot_pos{ name.find_last_of('.') }; dot_pos != std::string_view::npos) {
+		return std::make_pair(name.substr(0, dot_pos), name.substr(dot_pos));
+	}
+	return std::make_pair(name, view_type{});
+}
+template<class T>
+[[nodiscard]] auto dir_and_extension(const std::basic_string<T> &name) noexcept
+		-> std::pair<std::basic_string_view<T>, std::basic_string_view<T>> {
+	return dir_and_extension(std::basic_string_view<T>{ name });
+}
+
+// template<class T>
+// [[nodiscard]] auto dir_and_extension(const std::basic_string<T> &name) noexcept
+// 		-> std::pair<std::remove_all_extents_t<decltype(name)>, std::remove_all_extents_t<decltype(name)>> {
+// 	using view_type = std::remove_all_extents_t<decltype(name)>;
+
+// 	if (const auto dot_pos{ name.find_last_of('.') }; dot_pos != std::string_view::npos) {
+// 		return std::make_pair(name.substr(0, dot_pos), name.substr(dot_pos));
+// 	}
+// 	return std::make_pair(name, view_type{});
+// }
 
 } // namespace golxzn::core::utils

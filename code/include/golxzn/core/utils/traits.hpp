@@ -37,4 +37,34 @@ template<class T, class ...Ts>
 	return ((t == ts) && ...);
 }
 
+
+template<class T>
+struct container_value_type {
+	using type = std::remove_reference_t<T>;
+};
+
+template<class T, std::size_t N>
+struct container_value_type<T[N]> {
+	using type = T;
+};
+
+template<class T>
+struct container_value_type<T*> {
+	using type = T;
+};
+
+template<class T, std::size_t N>
+struct container_value_type<std::array<T, N>> {
+	using type = T;
+};
+
+// Specializations for std::vector, std::list, std::deque, std::set, std::multiset, std::map, std::multimap
+template<template<class...> class Container, class... Args>
+struct container_value_type<Container<Args...>> {
+	using type = typename Container<Args...>::value_type;
+};
+
+template<class T>
+using container_value_type_t = typename container_value_type<T>::type;
+
 } // namespace golxzn::core

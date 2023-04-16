@@ -18,3 +18,5 @@ if(NOT GOLXZNC_ENABLE_EXCEPTIONS)
 		list(APPEND compile_options -fno-exceptions)
 	endif()
 endif()
+
+list(APPEND definitions _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)

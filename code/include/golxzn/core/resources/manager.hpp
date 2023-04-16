@@ -12,14 +12,17 @@ namespace golxzn::core::resources {
 
 class GOLXZN_EXPORT manager {
 	static constexpr std::string_view class_name{ "resources::manager" };
-	static constexpr std::string_view url_separator{ "//" };
 
 	using LoadHandler = std::function<bytes(const std::string_view)>;
+	using LoadLinesHandler = std::function<std::vector<std::string>(const std::string_view)>;
 	using SaveHandler = std::function<bool(const std::string_view, const u8 *, const u32)>;
 	using ExistHandler = std::function<bool(const std::string_view)>;
+	using LastWriteTimeHandler = std::function<std::optional<fs::file_time_type>(const std::string_view)>;
 public:
+	static constexpr auto eol{ '\n' };
 	static constexpr std::string_view default_asset_directory{ "assets" };
 	static constexpr std::string_view default_app_name{ "core_unnamed" };
+	static constexpr std::string_view url_separator{ "//" };
 
 	static constexpr std::string_view resources_url{ "res://" };
 	static constexpr std::string_view user_url{ "user://" };
@@ -39,10 +42,12 @@ public:
 
 	[[nodiscard]] static bytes load_binary(const std::string_view path);
 	[[nodiscard]] static std::string load_string(const std::string_view path);
+	[[nodiscard]] static std::vector<std::string> load_lines(const std::string_view path);
 	[[nodiscard]] static types::image::ref load_image(const std::string_view path);
 
 	static bool save_binary(const std::string_view path, const bytes &data);
 	static bool save_string(const std::string_view path, const std::string_view data);
+	static bool save_lines(const std::string_view path, const std::vector<std::string> &lines);
 	static bool save_image(const std::string_view path, const types::image::ref &data);
 
 	[[nodiscard]] static bool exists(const std::string_view path) noexcept;
@@ -50,6 +55,8 @@ public:
 	[[nodiscard]] static bool is_http(const std::string_view path) noexcept;
 	[[nodiscard]] static bool is_resource(const std::string_view path) noexcept;
 	[[nodiscard]] static bool is_user(const std::string_view path) noexcept;
+
+	[[nodiscard]] static std::optional<fs::file_time_type> last_write_time(const std::string_view path) noexcept;
 
 	[[nodiscard]] static const std::error_code &last_error() noexcept;
 	[[nodiscard]] static const fs::path &assets_directory() noexcept;
@@ -65,11 +72,16 @@ private:
 	static fs::path user_root;
 	static std::error_code err;
 	static const umap<std::string_view, LoadHandler> load_handlers;
+	static const umap<std::string_view, LoadLinesHandler> load_lines_handlers;
 	static const umap<std::string_view, SaveHandler> save_handlers;
 	static const umap<std::string_view, ExistHandler> exist_handlers;
+	static const umap<std::string_view, LastWriteTimeHandler> last_write_time_handlers;
 
 	static bytes load_from(const fs::path &path);
 	static bytes load_from_http(const fs::path &path);
+	static std::vector<std::string> load_lines_from(const fs::path &path);
+	static std::vector<std::string> load_lines_from_http(const fs::path &path);
+	static std::optional<fs::file_time_type> last_write_time_for(const fs::path &path) noexcept;
 
 	static bool save_to(const fs::path &path, const u8 *data, const u32 size);
 	static bool save_to_http(const fs::path &path, const u8 *data, const u32 size);

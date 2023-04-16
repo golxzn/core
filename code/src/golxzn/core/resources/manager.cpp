@@ -1,3 +1,4 @@
+#include <numeric>
 #include <stb_image.h>
 #include <stb_image_write.h>
 #include <platform_folders.h>
@@ -45,6 +46,12 @@ const umap<std::string_view, manager::LoadHandler> manager::load_handlers{
 	{ manager::http_url,      [](const std::string_view path) { return manager::load_from_http(path); } },
 };
 
+const umap<std::string_view, manager::LoadLinesHandler> manager::load_lines_handlers{
+	{ manager::resources_url, [](const std::string_view path) { return manager::load_lines_from(manager::build_path(manager::assets_root, path, manager::resources_url)); } },
+	{ manager::user_url,      [](const std::string_view path) { return manager::load_lines_from(manager::build_path(manager::user_root, path, manager::user_url)); } },
+	{ manager::http_url,      [](const std::string_view path) { return manager::load_lines_from_http(path); } },
+};
+
 const umap<std::string_view, manager::SaveHandler> manager::save_handlers{
 	{ manager::resources_url, [](auto path, auto data, const auto size) { return manager::save_to(manager::build_path(manager::assets_root, path, manager::resources_url), data, size); } },
 	{ manager::user_url,      [](auto path, auto data, const auto size) { return manager::save_to(manager::build_path(manager::user_root, path, manager::user_url), data, size); } },
@@ -56,6 +63,12 @@ const umap<std::string_view, manager::ExistHandler> manager::exist_handlers{
 	{ manager::user_url,      [](const std::string_view path) { return manager::exists_in(manager::build_path(manager::user_root, path, manager::user_url)); } },
 	{ manager::http_url,      [](const std::string_view path) { return manager::exists_in_http(path); } },
 };
+
+const umap<std::string_view, manager::LastWriteTimeHandler> manager::last_write_time_handlers{
+	{ manager::resources_url, [](const std::string_view path) { return manager::last_write_time_for(manager::build_path(manager::assets_root, path, manager::resources_url)); } },
+	{ manager::user_url,      [](const std::string_view path) { return manager::last_write_time_for(manager::build_path(manager::user_root, path, manager::user_url)); } },
+};
+
 
 void manager::initialize(const std::string_view application_name, const std::string_view assets_directory_name) {
 	if (initialized) return;
@@ -91,6 +104,27 @@ bytes manager::load_binary(const std::string_view path) {
 std::string manager::load_string(const std::string_view path) {
 	if (const auto data{ load_binary(path) }; !data.empty())
 		return std::string{ std::begin(data), std::end(data) };
+	return {};
+}
+
+std::vector<std::string> manager::load_lines(const std::string_view path) {
+	if (path.empty()) {
+		spdlog::warn("[{}]: Cannot load lines from empty path.", class_name);
+		return {};
+	}
+
+	if (const auto url_pos{ path.find(url_separator) }; url_pos != path.npos) {
+		const auto url{ path.substr(0, url_pos + url_separator.size()) };
+		if (const auto &found{ load_lines_handlers.find(url) }; found != std::end(load_lines_handlers)) {
+			return found->second(path);
+		} else {
+			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+		}
+		return {};
+
+	}
+
+	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return {};
 }
 
@@ -163,6 +197,28 @@ bool manager::save_string(const std::string_view path, const std::string_view da
 	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return false;
 }
+
+bool manager::save_lines(const std::string_view path, const std::vector<std::string> &lines) {
+	if (path.empty() || lines.empty()) {
+		spdlog::warn("[{}]: Cannot save lines: {}", class_name,
+			path.empty() ? "empty path" : "empty data");
+		return false;
+	}
+
+	const auto size{ std::accumulate(std::begin(lines), std::end(lines), 0,
+		[](auto sum, const auto &line) { return sum + line.size() + sizeof(eol); })
+	};
+
+	bytes data{};
+	data.reserve(size);
+	for (const auto &line : lines) {
+		std::copy(std::begin(line), std::end(line), std::back_inserter(data));
+		data.emplace_back(static_cast<byte>(eol));
+	}
+
+	return save_binary(path, data);
+}
+
 bool manager::save_image(const std::string_view path, const types::image::ref &img) {
 	if (path.empty() || img == nullptr) {
 		spdlog::warn("[{}]: Cannot save image: {}",
@@ -268,6 +324,20 @@ bool manager::is_user(const std::string_view path) noexcept {
 	return false;
 }
 
+std::optional<core::fs::file_time_type> manager::last_write_time(const std::string_view path) noexcept {
+	if (path.empty()) return std::nullopt;
+
+	if (const auto url_pos{ path.find(url_separator) }; url_pos != path.npos) {
+		const auto url{ path.substr(0, url_pos + url_separator.size()) };
+		if (const auto &found{ last_write_time_handlers.find(url) }; found != std::end(last_write_time_handlers)) {
+			return found->second(path);
+		} else {
+			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+		}
+	}
+	return std::nullopt;
+}
+
 const std::error_code &manager::last_error() noexcept {
 	return err;
 }
@@ -323,8 +393,39 @@ bytes manager::load_from(const fs::path &path) {
 	return {};
 }
 bytes manager::load_from_http(const fs::path &path) {
-	spdlog::error("[{}] load_from_http isn't implemented yet", class_name);
+	spdlog::error("[{}] load_from_http isn't implemented yet 😢", class_name);
 	return {};
+}
+
+std::vector<std::string> manager::load_lines_from(const fs::path &path) {
+	if (!fs::exists(path, err) || !fs::is_regular_file(path, err))
+		return {};
+
+	/// @todo: Check the speed of this algorithm
+	/// I'm not really sure that it's faster than just reading file line by line
+	/// and allocate vector a few times
+	if (fs::ifstream file{ path, std::ios::ate }; file.is_open()) {
+		const auto count{ std::count(std::istreambuf_iterator<char>(file), {}, '\n') };
+		file.seekg(std::ios::beg);
+		std::vector<std::string> lines;
+		lines.reserve(count);
+		for (std::string line; std::getline(file, line);)
+			lines.emplace_back(std::move(line));
+		return lines;
+	}
+	return {};
+}
+std::vector<std::string> manager::load_lines_from_http(const fs::path &path) {
+	spdlog::error("[{}] load_lines_from_http isn't implemented yet 😢", class_name);
+	return {};
+}
+
+std::optional<fs::file_time_type> manager::last_write_time_for(const fs::path &path) noexcept {
+	const auto result{ fs::last_write_time(path, err) };
+	if (err.value() == 0)
+		return result;
+
+	spdlog::error("[{}] Cannot get lastwrite_time_for fail: {}", class_name, err.message());
 }
 
 bool manager::save_to(const fs::path &path, const u8 *data, const u32 size) {
