@@ -70,6 +70,7 @@ color image::pixel(const u32 x, const u32 y) const noexcept {
 		case channel::grey_alpha: return color{ data[0], data[0], data[0], data[1] };
 		case channel::rgb: return color{ data[0], data[1], data[2], static_cast<u8>(0xFF) };
 		case channel::rgba: return color{ data[0], data[1], data[2], data[3] };
+		default: break;
 	}
 	return default_fill_color;
 }
@@ -86,6 +87,7 @@ void image::set_pixel(const u32 x, const u32 y, const color color) noexcept {
 		case channel::grey_alpha: data[0] = raw_color[0]; data[1] = raw_color[3]; break;
 		case channel::rgb: std::copy_n(raw_color, color_count() - 1, data); break;
 		case channel::rgba: std::copy_n(raw_color, color_count(), data); break;
+		default: break;
 	}
 }
 

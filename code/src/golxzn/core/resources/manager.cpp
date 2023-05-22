@@ -426,6 +426,7 @@ std::optional<fs::file_time_type> manager::last_write_time_for(const fs::path &p
 		return result;
 
 	spdlog::error("[{}] Cannot get lastwrite_time_for fail: {}", class_name, err.message());
+	return std::nullopt;
 }
 
 bool manager::save_to(const fs::path &path, const u8 *data, const u32 size) {
