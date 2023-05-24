@@ -1,4 +1,4 @@
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
 
 #include "golxzn/core/types/image.hpp"
 
@@ -15,22 +15,14 @@ image::image(const u32 width, const u32 height, const channel img_channel, const
 image::image(const u32 width, const u32 height, const channel img_channel, const bytes &data) noexcept
 	: m_width{ width }, m_height{ height }, m_channel{ img_channel }, m_data{ data } {
 	if (m_data.size() < bytes_count()) {
-		spdlog::warn(
-			"[{}] The data is too small for image {}x{}."
-			"The bytes length is {}, but has to be {} at least",
-			class_name, m_width, m_height, m_data.size(), bytes_count()
-		);
+		// spdlog::warn("[{}] The data is too small for image {}x{}." "The bytes length is {}, but has to be {} at least", class_name, m_width, m_height, m_data.size(), bytes_count());
 	}
 }
 
 image::image(const u32 width, const u32 height, const channel img_channel, bytes &&data) noexcept
 	: m_width{ width }, m_height{ height }, m_channel{ img_channel }, m_data{ std::move(data) } {
 	if (m_data.size() < bytes_count()) {
-		spdlog::warn(
-			"[{}] The data is too small for image {}x{}."
-			"The bytes length is {}, but has to be {} at least",
-			class_name, m_width, m_height, m_data.size(), bytes_count()
-		);
+		// spdlog::warn( "[{}] The data is too small for image {}x{}." "The bytes length is {}, but has to be {} at least", class_name, m_width, m_height, m_data.size(), bytes_count());
 	}
 }
 
@@ -61,7 +53,7 @@ bool image::empty() const noexcept {
 
 color image::pixel(const u32 x, const u32 y) const noexcept {
 	if (x > m_width || y > m_height) {
-		spdlog::warn("[{}] {} is out of range", class_name, x > m_width ? "x" : "y");
+		// spdlog::warn("[{}] {} is out of range", class_name, x > m_width ? "x" : "y");
 		return default_fill_color;
 	}
 	const auto data{ m_data.data() + ((y * m_width + x) * color_count()) };
@@ -77,7 +69,7 @@ color image::pixel(const u32 x, const u32 y) const noexcept {
 
 void image::set_pixel(const u32 x, const u32 y, const color color) noexcept {
 	if (x > m_width || y > m_height) {
-		spdlog::warn("[{}] {} is out of range", class_name, x > m_width ? "x" : "y");
+		// spdlog::warn("[{}] {} is out of range", class_name, x > m_width ? "x" : "y");
 		return;
 	}
 	const auto data{ m_data.data() + ((y * m_width + x) * color_count()) };
@@ -158,7 +150,7 @@ void image::copy(const position &pos, const ref &target, const rect<u32> &target
 
 void image::copy(const position &pos, const image &target, const rect<u32> &target_rect, const bool apply_alpha, overlap_policy policy) {
 	if (target.empty()) {
-		spdlog::warn("[{}] Cannot copy empty images.", class_name);
+		// spdlog::warn("[{}] Cannot copy empty images.", class_name);
 		return;
 	}
 	if (empty()) {
@@ -239,18 +231,17 @@ void image::copy(const position &pos, const image &target, const rect<u32> &targ
 	}
 
 	/// @todo: Implement alpha channel copy
-	spdlog::info("[{}] Sorry. Alpha channel copy is not implemented yet. :<", class_name);
+	// spdlog::info("[{}] Sorry. Alpha channel copy is not implemented yet. :<", class_name);
 }
 
 void image::crop(const u32 x, const u32 y, const u32 width, const u32 height) noexcept {
 	if (empty()) {
-		spdlog::warn("[{}] Cannot crop empty image", class_name);
+		// spdlog::warn("[{}] Cannot crop empty image", class_name);
 		return;
 	}
 
 	if (x >= m_width || y >= m_height) {
-		spdlog::warn("[{}] Crop rect '[{}, {}, {}, {}]' is out of range",
-			class_name, x, y, width, height);
+		// spdlog::warn("[{}] Crop rect '[{}, {}, {}, {}]' is out of range", class_name, x, y, width, height);
 		return;
 	}
 

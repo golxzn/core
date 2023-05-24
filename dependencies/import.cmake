@@ -18,14 +18,12 @@ endif()
 
 set(subdirs
 	glm
-	spdlog
 	PlatformFolders
 	filesystem
 	stb_image
 )
 
 set(BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
-set(SPDLOG_INSTALL ON CACHE BOOL "" FORCE)
 set(PLATFORMFOLDERS_ENABLE_INSTALL ON CACHE BOOL "" FORCE)
 set(GHC_FILESYSTEM_WITH_INSTALL ON CACHE BOOL "" FORCE)
 set(STB_IMAGE_INSTALL ON CACHE BOOL "" FORCE)
@@ -35,7 +33,6 @@ endforeach()
 
 add_dependencies(${target}_lib
 	glm::glm
-	spdlog::spdlog
 	sago::platform_folders
 	ghcFilesystem::ghc_filesystem
 	stb::image
@@ -43,7 +40,6 @@ add_dependencies(${target}_lib
 list(APPEND libraries
 	Threads::Threads
 	glm::glm
-	spdlog::spdlog
 	sago::platform_folders
 	ghcFilesystem::ghc_filesystem
 	stb::image

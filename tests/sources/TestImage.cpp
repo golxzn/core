@@ -1,4 +1,4 @@
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_all.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -90,7 +90,7 @@ TEST_CASE("Image", "[golxzn][core][tests]") {
 		const auto t_h{ static_cast<i32>(source->height()) };
 		const auto s_w{ static_cast<i32>(target->width()) };
 		const auto s_h{ static_cast<i32>(target->height()) };
-		const rect<u32> src_rect{ 10, 10, s_w - 20, s_h - 20 };
+		const rect<u32> src_rect{ 10_u32, 10_u32, s_w - 20_u32, s_h - 20_u32 };
 
 		copy_test(p{           0_i32,           0_i32 }, {}, overlap::discard_target);                    // left upper corner
 		copy_test(p{       t_w - s_w,           0_i32 }, {}, overlap::discard_target);                    // right upper corner

@@ -4,6 +4,8 @@
 </p> -->
 <h2 align="center">⚙️ just the <b>gxen</b> game engine <b>core</b> ⚙️</h2>
 
+<h3 align="center"><i>minimum dependencies</i></h3>
+
 <br/>
 
 > WARNING! This project is under active development. The changes could brake your project!
@@ -21,7 +23,6 @@
 
 - CMake 3.23 or higher;
 - [glm::glm](https://github.com/g-truc/glm.git) (The Happy Bunny License (Modified MIT License));
-- [spdlog::spdlog](https://github.com/gabime/spdlog) (MIT License);
 - [sago::platform_folders](https://github.com/sago007/PlatformFolders) (MIT License);
 - [ghcFilesystem::ghc_filesystem](https://github.com/gulrak/filesystem) (MIT License);
 - [stb_image](https://github.com/nothings/stb) (MIT License or Public Domain).

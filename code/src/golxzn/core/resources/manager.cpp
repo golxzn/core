@@ -2,7 +2,7 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 #include <platform_folders.h>
-#include <spdlog/spdlog.h>
+// #include <spdlog/spdlog.h>
 #include "golxzn/core/resources/manager.hpp"
 
 namespace golxzn::core::resources {
@@ -72,8 +72,7 @@ const umap<std::string_view, manager::LastWriteTimeHandler> manager::last_write_
 
 void manager::initialize(const std::string_view application_name, const std::string_view assets_directory_name) {
 	if (initialized) return;
-	spdlog::info("[{}] Initializing with {} and {}",
-		class_name, application_name, assets_directory_name);
+	// spdlog::info("[{}] Initializing with {} and {}", class_name, application_name, assets_directory_name);
 	setup_assets_root(assets_directory_name);
 	setup_user_root(application_name);
 	initialized = true;
@@ -84,7 +83,7 @@ void manager::reset_write_mode() noexcept { writing_mode = write_mode::rewrite; 
 
 bytes manager::load_binary(const std::string_view path) {
 	if (path.empty()) {
-		spdlog::warn("[{}]: Cannot load binary from empty path.", class_name);
+		// spdlog::warn("[{}]: Cannot load binary from empty path.", class_name);
 		return {};
 	}
 
@@ -93,11 +92,11 @@ bytes manager::load_binary(const std::string_view path) {
 		if (const auto &found{ load_handlers.find(url) }; found != std::end(load_handlers)) {
 			return found->second(path);
 		} else {
-			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+			// spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return {};
 	}
-	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
+	// spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return {};
 }
 
@@ -109,7 +108,7 @@ std::string manager::load_string(const std::string_view path) {
 
 std::vector<std::string> manager::load_lines(const std::string_view path) {
 	if (path.empty()) {
-		spdlog::warn("[{}]: Cannot load lines from empty path.", class_name);
+		// spdlog::warn("[{}]: Cannot load lines from empty path.", class_name);
 		return {};
 	}
 
@@ -118,19 +117,19 @@ std::vector<std::string> manager::load_lines(const std::string_view path) {
 		if (const auto &found{ load_lines_handlers.find(url) }; found != std::end(load_lines_handlers)) {
 			return found->second(path);
 		} else {
-			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+			// spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return {};
 
 	}
 
-	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
+	// spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return {};
 }
 
 types::image::ref manager::load_image(const std::string_view path) {
 	if (path.empty()) {
-		spdlog::warn("[{}]: Cannot load image from empty path.", class_name);
+		// spdlog::warn("[{}]: Cannot load image from empty path.", class_name);
 		return nullptr;
 	}
 
@@ -141,8 +140,7 @@ types::image::ref manager::load_image(const std::string_view path) {
 		auto iters_pair{ make_iters_pair(data) };
 		const auto pixels{ stbi_load_from_callbacks(&callbacks, &iters_pair, &width, &height, &channels, 0) };
 		if (pixels == nullptr) {
-			spdlog::error("[{}] Cannot load image from path '{}': {}",
-				class_name, path, stbi_failure_reason());
+			// spdlog::error("[{}] Cannot load image from path '{}': {}", class_name, path, stbi_failure_reason());
 			return nullptr;
 		}
 
@@ -154,14 +152,13 @@ types::image::ref manager::load_image(const std::string_view path) {
 		stbi_image_free(pixels);
 		return img;
 	}
-	spdlog::info("[{}] Cannot load image: empty data.", class_name);
+	// spdlog::info("[{}] Cannot load image: empty data.", class_name);
 	return nullptr;
 }
 
 bool manager::save_binary(const std::string_view path, const bytes &data) {
 	if (path.empty() || data.empty()) {
-		spdlog::warn("[{}]: Cannot save binary: {}", class_name,
-			path.empty() ? "empty path" : "empty data");
+		// spdlog::warn("[{}]: Cannot save binary: {}", class_name, path.empty() ? "empty path" : "empty data");
 		return false;
 	}
 
@@ -170,17 +167,16 @@ bool manager::save_binary(const std::string_view path, const bytes &data) {
 		if (const auto &found{ save_handlers.find(url) }; found != std::end(save_handlers)) {
 			return found->second(path, data.data(), data.size());
 		} else {
-			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+			// spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return false;
 	}
-	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
+	// spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return false;
 }
 bool manager::save_string(const std::string_view path, const std::string_view data) {
 	if (path.empty() || data.empty()) {
-		spdlog::warn("[{}]: Cannot save string: {}", class_name,
-			path.empty() ? "empty path" : "empty data");
+		// spdlog::warn("[{}]: Cannot save string: {}", class_name, path.empty() ? "empty path" : "empty data");
 		return false;
 	}
 
@@ -190,18 +186,17 @@ bool manager::save_string(const std::string_view path, const std::string_view da
 		if (const auto &found{ save_handlers.find(url) }; found != std::end(save_handlers)) {
 			return found->second(path, reinterpret_cast<const u8 *>(data.data()), data.size());
 		} else {
-			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+			// spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return false;
 	}
-	spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
+	// spdlog::error("[{}] Cannot find URL in path '{}'", class_name, path);
 	return false;
 }
 
 bool manager::save_lines(const std::string_view path, const std::vector<std::string> &lines) {
 	if (path.empty() || lines.empty()) {
-		spdlog::warn("[{}]: Cannot save lines: {}", class_name,
-			path.empty() ? "empty path" : "empty data");
+		// spdlog::warn("[{}]: Cannot save lines: {}", class_name, path.empty() ? "empty path" : "empty data");
 		return false;
 	}
 
@@ -221,12 +216,11 @@ bool manager::save_lines(const std::string_view path, const std::vector<std::str
 
 bool manager::save_image(const std::string_view path, const types::image::ref &img) {
 	if (path.empty() || img == nullptr) {
-		spdlog::warn("[{}]: Cannot save image: {}",
-			class_name, path.empty() ? "empty path" : "empty image");
+		// spdlog::warn("[{}]: Cannot save image: {}", class_name, path.empty() ? "empty path" : "empty image");
 		return false;
 	}
 	if (img->empty()) {
-		spdlog::warn("[{}]: Cannot save empty image to the '{}' directory", class_name, path);
+		// spdlog::warn("[{}]: Cannot save empty image to the '{}' directory", class_name, path);
 		return false;
 	}
 
@@ -269,11 +263,11 @@ bool manager::save_image(const std::string_view path, const types::image::ref &i
 				img->width(), img->height(), img->color_count(), img->raw().data(), 90);
 			break;
 		default:
-			spdlog::error("[{}] Cannot save image: format is not supported", class_name);
+			// spdlog::error("[{}] Cannot save image: format is not supported", class_name);
 			return false;
 	}
 	if (convert_status == 0) {
-		spdlog::warn("[{}] Cannot save image to the '{}' directory", class_name, path);
+		// spdlog::warn("[{}] Cannot save image to the '{}' directory", class_name, path);
 		return false;
 	}
 	return manager::save_binary(path, ctx.buffer);
@@ -287,7 +281,7 @@ bool manager::exists(const std::string_view path) noexcept {
 		if (const auto &found{ exist_handlers.find(url) }; found != std::end(exist_handlers)) {
 			return found->second(path);
 		} else {
-			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+			// spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 		return false;
 	}
@@ -332,7 +326,7 @@ std::optional<core::fs::file_time_type> manager::last_write_time(const std::stri
 		if (const auto &found{ last_write_time_handlers.find(url) }; found != std::end(last_write_time_handlers)) {
 			return found->second(path);
 		} else {
-			spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
+			// spdlog::error("[{}] Unknown URL: '{}' in path '{}'", class_name, url, path);
 		}
 	}
 	return std::nullopt;
@@ -393,7 +387,7 @@ bytes manager::load_from(const fs::path &path) {
 	return {};
 }
 bytes manager::load_from_http(const fs::path &path) {
-	spdlog::error("[{}] load_from_http isn't implemented yet 😢", class_name);
+	// spdlog::error("[{}] load_from_http isn't implemented yet 😢", class_name);
 	return {};
 }
 
@@ -416,7 +410,7 @@ std::vector<std::string> manager::load_lines_from(const fs::path &path) {
 	return {};
 }
 std::vector<std::string> manager::load_lines_from_http(const fs::path &path) {
-	spdlog::error("[{}] load_lines_from_http isn't implemented yet 😢", class_name);
+	// spdlog::error("[{}] load_lines_from_http isn't implemented yet 😢", class_name);
 	return {};
 }
 
@@ -425,7 +419,7 @@ std::optional<fs::file_time_type> manager::last_write_time_for(const fs::path &p
 	if (err.value() == 0)
 		return result;
 
-	spdlog::error("[{}] Cannot get lastwrite_time_for fail: {}", class_name, err.message());
+	// spdlog::error("[{}] Cannot get lastwrite_time_for fail: {}", class_name, err.message());
 	return std::nullopt;
 }
 
@@ -451,7 +445,7 @@ bool manager::save_to_http(const fs::path &path, const u8 *data, const u32 size)
 	if (!path.has_filename() || size == 0 || data == nullptr)
 		return false;
 	/// @todo: Implement loading file from the web
-	spdlog::error("[{}] save_to_http isn't implemented yet", class_name);
+	// spdlog::error("[{}] save_to_http isn't implemented yet", class_name);
 	return false;
 }
 
@@ -464,7 +458,7 @@ bool manager::exists_in_http(const fs::path &path) noexcept {
 	if (path.empty()) return false;
 
 	/// @todo: Implement loading file from the web
-	spdlog::error("[{}] exist_to_http isn't implemented yet", class_name);
+	// spdlog::error("[{}] exist_to_http isn't implemented yet", class_name);
 	return false;
 }
 
@@ -486,16 +480,14 @@ void manager::setup_assets_root(const std::string_view assets_name) {
 			const auto current{ directory / targetDir };
 			if (fs::exists(current, err)) {
 				assets_root = current;
-				spdlog::info("[{}] Assets directory was found in '{}'",
-					class_name, assets_root.string());
+				// spdlog::info("[{}] Assets directory was found in '{}'", class_name, assets_root.string());
 				return;
 			}
 		}
 		assets_root = assets_root.parent_path();
 	}
 	assets_root = fs::current_path(err) / targetDir;
-	spdlog::warn("[{}] Cannot find '{}' directory. Creating in '{}'",
-		class_name, targetDir.string(), assets_root.string());
+	// spdlog::warn("[{}] Cannot find '{}' directory. Creating in '{}'", class_name, targetDir.string(), assets_root.string());
 	fs::create_directories(assets_root, err);
 }
 
@@ -506,7 +498,7 @@ void manager::setup_user_root(const std::string_view app_name) {
 		fs::create_directories(user_root, err);
 	}
 
-	spdlog::info("[{}] User directory was found in '{}'", class_name, user_root.string());
+	// spdlog::info("[{}] User directory was found in '{}'", class_name, user_root.string());
 }
 
 } // namespace golxzn::core::resources
