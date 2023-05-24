@@ -39,32 +39,6 @@ endfunction()
 
 include(CMakeParseArguments)
 
-function(get_cpm)
-	set(version VERSION RENAME)
-	cmake_parse_arguments(GET_CPM "" "${version}" "" ${ARGN})
-	if(NOT GET_CPM_VERSION)
-		message(FATAL_ERROR "[get_cpm]: Version was not found! Set VERSION parameter explicitly!")
-	endif()
-
-	if(CPM_SOURCE_CACHE)
-		set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/cpm/CPM_${GET_CPM_VERSION}.cmake")
-	elseif(DEFINED ENV{CPM_SOURCE_CACHE})
-		set(CPM_DOWNLOAD_LOCATION "$ENV{CPM_SOURCE_CACHE}/cpm/CPM_${GET_CPM_VERSION}.cmake")
-	else()
-		set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${GET_CPM_VERSION}.cmake")
-	endif()
-
-	if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
-		message(STATUS "Downloading CPM.cmake to ${CPM_DOWNLOAD_LOCATION}")
-		file(DOWNLOAD
-			https://github.com/TheLartians/CPM.cmake/releases/download/v${GET_CPM_VERSION}/CPM.cmake
-			${CPM_DOWNLOAD_LOCATION}
-		)
-	endif()
-
-	include(${CPM_DOWNLOAD_LOCATION})
-endfunction()
-
 macro(get_param_name name)
 	string(FIND ${param} " " __param_name_sep)
 	string(SUBSTRING ${param} 0 ${__param_name_sep} __param_name)

@@ -2,11 +2,7 @@
 
 #define NOMINMAX
 
-#if defined(GOLXZN_BOOSTED)
-	#include <boost/unordered_map.hpp>
-#else
-	#include <unordered_map>
-#endif
+#include <unordered_map>
 
 #include <vector>
 #include <memory>
@@ -60,17 +56,10 @@ namespace types_literals {
 
 } // namespace types_literals
 
-#if defined(GOLXZN_BOOSTED)
-	template<class Key, class Mapped, class Hash = boost::hash<Key>,
-		class Pred = std::equal_to<Key>,
-		class Alloc = std::allocator<std::pair<Key const, Mapped>>>
-	using umap = boost::unordered_map<Key, Mapped, Hash, Pred, Alloc>;
-#else
-	template<class Key, class Mapped, class Hash = std::hash<Key>,
-		class KeyEqual = std::equal_to<Key>,
-		class Alloc = std::allocator<std::pair<const Key, Mapped>>>
-	using umap = std::unordered_map<Key, Mapped, Hash, KeyEqual, Alloc>;
-#endif
+template<class Key, class Mapped, class Hash = std::hash<Key>,
+	class KeyEqual = std::equal_to<Key>,
+	class Alloc = std::allocator<std::pair<const Key, Mapped>>>
+using umap = std::unordered_map<Key, Mapped, Hash, KeyEqual, Alloc>;
 
 template<class Key, class Hash = std::hash<Key>, class KeyEqual = std::equal_to<Key>,
 	class Alloc = std::allocator<Key>>

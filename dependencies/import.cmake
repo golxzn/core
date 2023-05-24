@@ -4,18 +4,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 
-find_package(Threads REQUIRED)
-
-if(GOLXZNC_USE_BOOST)
-	CPMAddPackage(NAME Boost
-		VERSION ${GOLXZNC_BOOST_VERSION}
-		GITHUB_REPOSITORY "boostorg/boost"
-		GIT_TAG "boost-${GOLXZNC_BOOST_VERSION}"
-	)
-	list(APPEND libraries ${Boost_LIBRARIES})
-	list(APPEND includes ${Boost_INCLUDE_DIR})
-endif()
-
 set(subdirs
 	glm
 	PlatformFolders
@@ -38,7 +26,6 @@ add_dependencies(${target}_lib
 	stb::image
 )
 list(APPEND libraries
-	Threads::Threads
 	glm::glm
 	sago::platform_folders
 	ghcFilesystem::ghc_filesystem
