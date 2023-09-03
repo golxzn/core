@@ -11,6 +11,19 @@
 
 namespace golxzn::core::utils {
 
+template<class T> struct whitespaces {};
+
+template<> struct whitespaces<char> {
+	static constexpr std::basic_string_view<char> value{ " \t" };
+};
+template<> struct whitespaces<wchar_t> {
+	static constexpr std::basic_string_view<wchar_t> value{ L" \t" };
+};
+
+template<class T>
+static constexpr auto whitespaces_v{ whitespaces<T>::value };
+
+
 [[nodiscard]] inline size_t size(const char *s) noexcept { return std::strlen(s); }
 [[nodiscard]] inline size_t size(const wchar_t *s) noexcept { return std::wcslen(s); }
 [[nodiscard]] inline size_t size(const std::string &s) noexcept { return s.size(); }
@@ -158,15 +171,19 @@ template<class T>
 	return dir_and_extension(std::basic_string_view<T>{ name });
 }
 
-// template<class T>
-// [[nodiscard]] auto dir_and_extension(const std::basic_string<T> &name) noexcept
-// 		-> std::pair<std::remove_all_extents_t<decltype(name)>, std::remove_all_extents_t<decltype(name)>> {
-// 	using view_type = std::remove_all_extents_t<decltype(name)>;
+template<class T>
+[[nodiscard]] std::basic_string<T> strip(const std::basic_string_view<T> str) noexcept {
+	static constexpr auto whitespaces{ whitespaces_v<T> };
 
-// 	if (const auto dot_pos{ name.find_last_of('.') }; dot_pos != std::string_view::npos) {
-// 		return std::make_pair(name.substr(0, dot_pos), name.substr(dot_pos));
-// 	}
-// 	return std::make_pair(name, view_type{});
-// }
+	const auto start{ str.find_first_not_of(whitespaces) };
+	const auto end{ str.find_last_not_of(whitespaces) };
+	return std::basic_string<T>{ str.substr(start, start - end) };
+}
+
+template<class T, size_t N>
+[[nodiscard]] std::basic_string<T> strip(const T (&str)[N]) {
+	return strip(std::basic_string_view<T>{ str, N });
+}
+
 
 } // namespace golxzn::core::utils
